@@ -1,14 +1,15 @@
 #ifndef MESSAGE
 #define MESSAGE
 #include<stdio.h>
-//operation
+//operation of bus
 #define REPLY   0x0
 #define BUSUPD  0x1
 #define FLUSH   0x2
 #define BUSRD   0x4
 #define BUSRDX  0x8
-//#define LOAD    0x10
-//#define STORE   0x20
+//operation of cache
+#define LOAD    0x10
+#define STORE   0x20
 //dest or src
 #define BROADCAST   0xf
 #define CACHE0_ID   0x1
