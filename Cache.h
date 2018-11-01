@@ -7,10 +7,16 @@
 #include"MESI.h"
 #define MESI    1
 #define DRAGON  2
+//shared line value
+#define PROCESSOR0_HAVE     0x1
+#define PROCESSOR1_HAVE     0x2
+#define PROCESSOR2_HAVE     0x4
+#define PROCESSOR3_HAVE     0x8
 
 struct cache_block{
     unsigned int addr;
     int status;
+    unsigned int shared_line;
 };
 struct cache_bank{
     struct cache_block *blocks;

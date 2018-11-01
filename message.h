@@ -5,10 +5,10 @@
 #define REPLY   0x0
 #define BUSUPD  0x1
 #define FLUSH   0x2
-#define BUSRD   0x3
-#define BUSRDX  0x4
-#define LOAD    0x5
-#define STORE   0x6
+#define BUSRD   0x4
+#define BUSRDX  0x8
+//#define LOAD    0x10
+//#define STORE   0x20
 //dest or src
 #define BROADCAST   0xf
 #define CACHE0_ID   0x1
@@ -22,9 +22,9 @@
 struct msg{
     long int cycle;     //time need to handle
     int operation;
-    int reply_info;
+    //int reply_info;
     unsigned int addr;
-    unsigned int RW_size;   //int byte
+    //unsigned int RW_size;   //number of bytes, used in BUSUPD
     int dest;
     int src;
 };
