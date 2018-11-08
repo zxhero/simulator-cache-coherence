@@ -91,67 +91,36 @@ struct cache_block* find_avaliable_block(struct L1_cache *cache, unsigned int ad
 };
 
 void cache_run(struct L1_cache *cache, long int cycle){
-    struct msg* pro_msg = read_pipe(cache->pipe_from_pro);
-    struct msg* bus_msg = read_pipe(cache->pipe_from_bus);
+    struct msg* pro_msg = peek_at_msg(cache->pipe_from_pro);
+    struct msg* bus_msg = peek_at_msg(cache->pipe_from_bus);
     struct msg* rply_msg = NULL;
     struct cache_block *block = NULL;
     if(pro_msg != NULL){
+        pro_msg = read_pipe(cache->pipe_from_pro);
         block = lookup_cache(cache,pro_msg->addr);
-        if(block != NULL){
             if(cache->protocol == DRAGON){
                 rply_msg = handle_msg_fromCPU_dragon(block,pro_msg);
             }else{
                 rply_msg = handle_msg_fromCPU_MESI(block,pro_msg);
             }
-        }else{
-
-        }
     }else if(bus_msg != NULL){
+        bus_msg = read_pipe(cache->pipe_from_bus);
         block = lookup_cache(cache,bus_msg->addr);
-        if(block != NULL){
             if(cache->protocol == DRAGON){
                 rply_msg = handle_msg_fromBUS_dragon(block,bus_msg);
             }else{
                 rply_msg = handle_msg_fromBUS_MESI(block,bus_msg);
             }
+    }
+    if(rply_msg != NULL){
+        if(rply_msg->dest == PROCESSOR_ID){
+            write_pipe(cache->pipe_to_pro,rply_msg);
         }else{
-
+            write_pipe(cache->pipe_to_bus,rply_msg);
         }
     }
     return;
 };
-
-void cache_run(struct L1_cache *cache, long int cycle){
-	msg *message;
-	unsigned int addr;
-	bool found = false; //Flag to check if the address has been found
-
-
-	if(peek_at_msg(L1_cache->pipe_from_pro) != NULL){ //Checking for message from processor
-		message = read_pipe(L1_cache->pipe_from_pro);
-		addr = message.addr;
-
-		while(L1_cache->banks->blocks != NULL){ //Check if the cache block is empty
-			if(L1_cache->banks->blocks.addr == addr){
-				found = true;
-				break;
-			}
-			L1_cache->banks->blocks++; //Move to the next cache block in the cache bank
-		}
-
-		if(found){ //Cache hit
-			//We need to send a message to the processor to say that we have the data but how?
-		}
-		else{ //Cache miss
-			//We need to send a message to the processor to say that we don't have the data but how?
-		}
-	}
-	else if(peek_at_msg(L1_cache->pipe_from_bus) != NULL){ //Checking for message from bus
-		message = read_pipe(L1_cache->pipe_from_bus);
-
-		//Check for message operation and update accordingly? We need a status variable for the cache as well
-	}
-}
 
 /*
 This function will check the processor for a message.
