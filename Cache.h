@@ -47,7 +47,35 @@ void cache_init(int cache_size, int associativity, int block_size, char* protoco
 
 
 void cache_run(struct L1_cache *cache, long int cycle){
+	msg *message;
+	unsigned int addr;
+	bool found = false; //Flag to check if the address has been found
 
+	
+	if(peek_at_msg(L1_cache->pipe_from_pro) != NULL){ //Checking for message from processor
+		message = read_pipe(L1_cache->pipe_from_pro);
+		addr = message.addr; 
+
+		while(L1_cache->banks->blocks != NULL){ //Check if the cache block is empty
+			if(L1_cache->banks->blocks.addr == addr){
+				found = true;
+				break;
+			}
+			L1_cache->banks->blocks++; //Move to the next cache block in the cache bank
+		}
+
+		if(found){ //Cache hit
+			//We need to send a message to the processor to say that we have the data but how?
+		}
+		else{ //Cache miss
+			//We need to send a message to the processor to say that we don't have the data but how?
+		}
+	}
+	else if(peek_at_msg(L1_cache->pipe_from_bus) != NULL){ //Checking for message from bus
+		message = read_pipe(L1_cache->pipe_from_bus);
+
+		//Check for message operation and update accordingly? We need a status variable for the cache as well
+	}
 }
 
 /*
