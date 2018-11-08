@@ -29,10 +29,26 @@ struct L1_cache{
     struct cache_bank *banks;
     unsigned int set_index_mask;
     int block_size;
+    int associativity;
+    char* protocol;
 };
 
-void cache_init(int cache_size, int associativity, int block_size, char* protocol); //Create the L1_cache
-void cache_run(struct L1_cache *cache, long int cycle); 
+void cache_init(int cache_size, int associativity, int block_size, char* protocol){//Create the L1_cache
+	struct L1_cache *L1_cache = malloc(sizeof(cache_size)); //Allocates space based on the cache size
+	init_pipe(L1_cache->pipe_to_pro);
+	init_pipe(L1_cache->pipe_from_pro);
+	init_pipe(L1_cache->pipe_to_bus);
+	init_pipe(L1_cache->pipe_from_bus);
+	init_pipe(L1_cache->banks);
+	L1_cache.block_size = block_size; 
+	L1_cache.associativity = associativity;
+	L1_cache.protocol = protocol; 
+};
+
+
+void cache_run(struct L1_cache *cache, long int cycle){
+
+}
 
 /*
 This function will check the processor for a message. 

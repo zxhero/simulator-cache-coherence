@@ -18,7 +18,7 @@ struct bus{
     struct pipe *pipe_from_mem;
 };
 
-struct bus * bus_init(struct L1_cache *C0, struct L1_cache *C1, struct L1_cache *C2, struct L1_cache *C3, struct memory *mem){
+struct void bus_init(struct L1_cache *C0, struct L1_cache *C1, struct L1_cache *C2, struct L1_cache *C3, struct memory *mem){
     struct bus *bus = malloc(sizeof(struct bus));
     bus->pipe_from_C0 = C0->pipe_to_bus;
     bus->pipe_to_C0 = C0->pipe_from_bus;
