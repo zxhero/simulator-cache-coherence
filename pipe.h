@@ -37,5 +37,11 @@ struct msg* read_pipe(struct pipe* pipe){                           //read the f
     free(ele);
     return msg;
 };
+
+struct msg* peek_at_msg(struct pipe* pipe){
+    struct list_head *head = pipe->head.head.next;
+    struct element *ele = list_entry(head,struct element,head)
+    return ele->msg;
+};
 #endif // PIPE
 
