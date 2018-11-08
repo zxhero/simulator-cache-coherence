@@ -3,13 +3,15 @@
 #include<stdio.h>
 //operation of bus
 #define REPLY   0x0
-#define BUSUPD  0x1
-#define FLUSH   0x2
-#define BUSRD   0x4
-#define BUSRDX  0x8
-//operation of cache
+#define REPLYX  0x1
+#define BUSUPD  0x2
+#define FLUSH   0x4
+#define BUSRD   0x8
+#define BUSRDX  0x10
+//operation of CPU
 #define LOAD    0x10
 #define STORE   0x20
+#define SUCCEED 0x40
 //dest or src
 #define BROADCAST   0xf
 #define CACHE0_ID   0x1
@@ -17,6 +19,7 @@
 #define CACHE2_ID   0x3
 #define CACHE3_ID   0x4
 #define MEMORY_ID   0x5
+#define PROCESSOR_ID    0x6
 //reply information
 #define NOT_FOUND   0x1
 #define FOUND       0x2
