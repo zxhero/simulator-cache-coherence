@@ -33,32 +33,34 @@ void bus_init(struct L1_cache *C0, struct L1_cache *C1, struct L1_cache *C2, str
 }
 
 void forward_msg(struct bus *bus, struct msg *message){
-    switch(message->dest){
-        case BROADCAST:
-            write_pipe(bus->pipe_to_C0,message);
-            write_pipe(bus->pipe_to_C1,message);
-            write_pipe(bus->pipe_to_C2,message);
-            write_pipe(bus->pipe_to_C3,message);
-            write_pipe(bus->pipe_to_mem,message);
-            break;
-        case CACHE0_ID:
-            write_pipe(bus->pipe_to_C0,message);
-            break;
-        case CACHE1_ID:
-            write_pipe(bus->pipe_to_C1,message);
-            break;
-        case CACHE2_ID:
-            write_pipe(bus->pipe_to_C2,message);
-            break;
-        case CACHE3_ID:
-            write_pipe(bus->pipe_to_C3,message);
-            break;
-        case MEMORY_ID:
-            write_pipe(bus->pipe_to_mem,message);
-            break;
+    
+    if((message->dest & BROADCAST) != 0){
+        write_pipe(bus->pipe_to_C0,message);
+        write_pipe(bus->pipe_to_C1,message);
+        write_pipe(bus->pipe_to_C2,message);
+        write_pipe(bus->pipe_to_C3,message);
+        write_pipe(bus->pipe_to_mem,message);
+        return;
     }
-}
 
+    if((message->dest & CACHE0_ID) != 0){
+        write_pipe(bus->pipe_to_C0,message);
+    }
+    if((message->dest & CACHE1_ID) != 0){
+        write_pipe(bus->pipe_to_C1,message);
+    }
+    if((message->dest & CACHE2_ID) != 0){
+        write_pipe(bus->pipe_to_C2,message);
+    }
+    if((message->dest & CACHE3_ID) != 0){
+        write_pipe(bus->pipe_to_C3,message);
+    }
+    if((message->dest & MEMORY_ID) != 0){
+        write_pipe(bus->pipe_to_mem,message);
+    }
+
+
+}
 /*
 - Takes the message (from processor and memeory)and sends it to the pipe of the destination. 
 - Processor has more priority than memory. 
@@ -72,7 +74,7 @@ void bus_run(struct bus *bus, long int cycle){
     struct msg *from_C3 = malloc(sizeof(struct msg)); //Message from C3
     struct msg *from_mem = malloc(sizeof(struct msg)); //Message from mem
 
-    msg *message;
+    struct msg *message = malloc(sizeof(struct msg));
 
 
     /* Reading in all the messages from the pipe*/ 
@@ -82,23 +84,23 @@ void bus_run(struct bus *bus, long int cycle){
     from_C3 = peek_at_msg(bus->pipe_from_C3);
     from_mem = peek_at_msg(bus->pipe_from_mem);
 
-    if(from_C0->cycle == cycle){
+    if(from_C0 != NULL && from_C0->cycle == cycle){
         message = read_pipe(bus->pipe_from_C0);
         forward_msg(bus, message);
     }
-    else if(from_C1->cycle == cycle){
+    else if(from_C1 != NULL && from_C1->cycle == cycle){
         message = read_pipe(bus->pipe_from_C1);
         forward_msg(bus, message);
     }
-    else if(from_C2->cycle == cycle){
+    else if(from_C2 != NULL && from_C2->cycle == cycle){
         message = read_pipe(bus->pipe_from_C2);
         forward_msg(bus, message);
     }
-    else if(from_C3->cycle == cycle){
+    else if(from_C3 != NULL && from_C3->cycle == cycle){
         message = read_pipe(bus->pipe_from_C3);
         forward_msg(bus, message);
     }
-    else if(from_mem->cycle == cycle){
+    else if(from_mem != NULL && from_mem->cycle == cycle){
         message = read_pipe(bus->pipe_from_mem);
         forward_msg(bus, message);
     }
