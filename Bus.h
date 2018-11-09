@@ -85,54 +85,67 @@ void bus_run(struct bus *bus, long int cycle){
 
     if(from_C0 != NULL && from_C0->cycle == cycle && from_C0->operation == FLUSH){
         message = read_pipe(bus->pipe_from_C0);
+        message->cycle++;
         forward_msg(bus, message);
     }
     else if(from_C1 != NULL && from_C1->cycle == cycle && from_C1->operation == FLUSH){
         message = read_pipe(bus->pipe_from_C1);
+        message->cycle++;
         forward_msg(bus, message);
     }
     else if(from_C2 != NULL && from_C2->cycle == cycle && from_C2->operation == FLUSH){
         message = read_pipe(bus->pipe_from_C2);
+        message->cycle++;
         forward_msg(bus, message);
     }
     else if(from_C3 != NULL && from_C3->cycle == cycle && from_C3->operation == FLUSH){
         message = read_pipe(bus->pipe_from_C3);
+        message->cycle++;
         forward_msg(bus, message);
     }
     else if(from_C0 != NULL && from_C0->cycle == cycle && from_C0->operation == BUSUPD){
         message = read_pipe(bus->pipe_from_C0);
+        message->cycle++;
         forward_msg(bus, message);
     }
     else if(from_C1 != NULL && from_C1->cycle == cycle && from_C1->operation == BUSUPD){
         message = read_pipe(bus->pipe_from_C1);
+        message->cycle++;
         forward_msg(bus, message);
     }
     else if(from_C2 != NULL && from_C2->cycle == cycle && from_C2->operation == BUSUPD){
         message = read_pipe(bus->pipe_from_C2);
+        message->cycle++;
         forward_msg(bus, message);
     }
     else if(from_C3 != NULL && from_C3->cycle == cycle && from_C3->operation == BUSUPD){
         message = read_pipe(bus->pipe_from_C3);
+        message->cycle++;
         forward_msg(bus, message);
     }
     else if(from_C0 != NULL && from_C0->cycle == cycle){ //All bus operations have the same priority
         message = read_pipe(bus->pipe_from_C0);
+        message->cycle++;
         forward_msg(bus, message);
     }
     else if(from_C1 != NULL && from_C1->cycle == cycle){
         message = read_pipe(bus->pipe_from_C1);
+        message->cycle++;
         forward_msg(bus, message);
     }
     else if(from_C2 != NULL && from_C2->cycle == cycle){
         message = read_pipe(bus->pipe_from_C2);
+        message->cycle++;
         forward_msg(bus, message);
     }
     else if(from_C3 != NULL && from_C3->cycle == cycle){
         message = read_pipe(bus->pipe_from_C3);
+        message->cycle++;
         forward_msg(bus, message);
     }
     else if(from_mem != NULL && from_mem->cycle == cycle){
         message = read_pipe(bus->pipe_from_mem);
+        message->cycle++;
         forward_msg(bus, message);
     }
 };
