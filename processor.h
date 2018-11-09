@@ -35,17 +35,14 @@ void processor_run(long int cycle, struct processor *proc){
 	int label; //To store the value of the label
 	if(proc->state == 1 && peek_at_msg(proc->pipe_from_cache) != NULL){ //There is a message from the cache
 		read_pipe(proc->pipe_from_cache);
-		proc->cycle++;
 		proc->state = 0; //Make the processor free again
 		return;
 	}
 	else if(proc->state == 2 && proc->cycle == cycle){ //Check if the processor is stalling for computation
-		proc->cycle++;
 		proc->state = 0; //Make the processor free again
 		return;
 	}
 	else if(proc->state != 0){ //Processor is busy stalling 
-		proc->cycle++;
 		return;
 	}	
 	else{ //Processor is free & check for labels and the addr
@@ -67,7 +64,6 @@ void processor_run(long int cycle, struct processor *proc){
 		} 
 		else if(label == 2) { //Computation instruction 
 			proc->cycle = cycle + addr;
-			proc->cycle++;
 			return;
 		}
 		else{
