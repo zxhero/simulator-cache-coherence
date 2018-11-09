@@ -6,6 +6,7 @@
 #include"processor.h"
 #include"Bus.h"
 #include"Memory.h"
+#include"message.h"
 
 int Finish;
 long int cycle;

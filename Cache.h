@@ -3,8 +3,6 @@
 #include<stdio.h>
 #include"pipe.h"
 #include"message.h"
-#include"Dragon.h"
-#include"MESI.h"
 #define MESI    1
 #define DRAGON  2
 //shared line value
@@ -34,12 +32,18 @@ struct L1_cache{
     int num_of_banks;
     int block_size;
     char protocol;
+    char id;
 };
 
-struct L1_cache* cache_init(int cache_size, int associativity, int block_size, char* protocol){
+#include"Dragon.h"
+#include"MESI.h"
+
+struct L1_cache* cache_init(int cache_size, int associativity, int block_size, char* protocol, char id){
+    printf("cache %c init....\n",'0'+id);
     int i, num_of_blocks;
     unsigned int mask = 0xffffffff;
     struct L1_cache *local_cache = malloc(sizeof(struct L1_cache));
+    local_cache->id = id;
     local_cache->pipe_from_bus = malloc(sizeof(struct pipe));
     init_pipe(local_cache->pipe_from_bus);
     local_cache->pipe_from_pro = malloc(sizeof(struct pipe));
@@ -92,11 +96,12 @@ struct cache_block* find_avaliable_block(struct L1_cache *cache, unsigned int ad
 };
 
 void cache_run(struct L1_cache *cache, long int cycle){
-    /*struct msg* pro_msg = peek_at_msg(cache->pipe_from_pro);
+    //printf("cache %d run...\n",cache->id);
+    struct msg* pro_msg = peek_at_msg(cache->pipe_from_pro);
     struct msg* bus_msg = peek_at_msg(cache->pipe_from_bus);
     struct msg* rply_msg = NULL;
     struct cache_block *block = NULL;
-    if(pro_msg != NULL){
+    if(pro_msg != NULL && pro_msg->cycle == cycle){
         pro_msg = read_pipe(cache->pipe_from_pro);
         block = lookup_cache(cache,pro_msg->addr);
             if(cache->protocol == DRAGON){
@@ -104,7 +109,7 @@ void cache_run(struct L1_cache *cache, long int cycle){
             }else{
                 rply_msg = handle_msg_fromCPU_MESI(block,pro_msg);
             }
-    }else if(bus_msg != NULL){
+    }else if(bus_msg != NULL && bus_msg->cycle == cycle){
         bus_msg = read_pipe(cache->pipe_from_bus);
         block = lookup_cache(cache,bus_msg->addr);
             if(cache->protocol == DRAGON){
@@ -120,8 +125,27 @@ void cache_run(struct L1_cache *cache, long int cycle){
             write_pipe(cache->pipe_to_bus,rply_msg);
         }
     }
+    return;
+    /*
+        test*/
+    //if(bus_msg != NULL) printf("cycle %ld, cache %d read from bus\n",cycle, cache->id);
+    /*if(pro_msg != NULL && pro_msg->cycle == cycle){
+        printf("cycle %ld,cache %d read from pro\n",cycle, cache->id);
+        pro_msg = read_pipe(cache->pipe_from_pro);
+        pro_msg->dest = MEMORY_ID;
+        pro_msg->src = cache->id;
+        pro_msg->cycle ++;
+        write_pipe(cache->pipe_to_bus,pro_msg);
+    }else if(bus_msg != NULL && bus_msg->cycle == cycle){
+        printf("cycle %ld, cache %d read from bus\n",cycle, cache->id);
+        bus_msg = read_pipe(cache->pipe_from_bus);
+        bus_msg->dest = PROCESSOR_ID;
+        bus_msg->src = cache->id;
+        bus_msg->operation = SUCCEED;
+        bus_msg->cycle ++;
+        write_pipe(cache->pipe_to_pro,bus_msg);
+    }
     return;*/
-    
 };
 
 /*

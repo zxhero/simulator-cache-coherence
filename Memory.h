@@ -1,6 +1,7 @@
 #ifndef MEMORY
 #define MEMORY
 #include<stdio.h>
+#include<stdlib.h>
 #include"pipe.h"
 
 //#define PORT_BUSY   1
@@ -30,6 +31,7 @@ struct memory{
 };
 
 struct memory * memory_init(){
+    printf("memory init....\n");
     struct memory * mem = malloc(sizeof(struct memory));
     mem->pipe_from_bus = malloc(sizeof(struct pipe));
     mem->pipe_to_bus = malloc(sizeof(struct pipe));
@@ -65,6 +67,7 @@ void write_back(struct memory *mem, long int cycle){
 }
 
 void memory_run(struct memory *mem, long int cycle){
+    //printf("memory run...\n");
     struct element *request,*next_request;
     write_back(mem,cycle);
     list_for_each_entry_safe(request,next_request,&mem->pipe_from_bus->head.head,head){
@@ -72,7 +75,7 @@ void memory_run(struct memory *mem, long int cycle){
             unsigned int addr = request->msg->addr;
             struct mem_block *entry = lookup_mem(addr,mem);
             if(request->msg->operation & (BUSRD | BUSRDX) != 0){                                      //read mem
-                if(entry == 0){
+                if(entry == NULL){
                     struct msg *reply = malloc(sizeof(struct msg));
                     memset(reply,0,sizeof(struct msg));
                     reply->addr = addr;
@@ -106,7 +109,19 @@ void memory_run(struct memory *mem, long int cycle){
         list_delete_entry(&request->head);
         free(request);
     }
-
+    /* test */
+    /*struct msg *request = peek_at_msg(mem->pipe_from_bus);
+    if(request != NULL && request->cycle == cycle){
+        request = read_pipe(mem->pipe_from_bus);
+        request->operation = REPLY;
+        request->cycle = cycle + random()%10;
+        printf("cycle %ld, memory recieve requst from cache %d, and wait %ld\n",cycle, request->src,request->cycle - cycle);
+        request->dest = request->src;
+        request->src = MEMORY_ID;
+        
+        write_pipe(mem->pipe_to_bus, request);
+    }
+    return;*/
 }
 #endif // MEMORY
 

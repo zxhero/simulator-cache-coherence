@@ -14,10 +14,10 @@ int main(int argc, char *argv[]){
     }
     //initialize
     struct L1_cache *cache0, *cache1, *cache2, *cache3;
-    cache0 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol);
-    cache1 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol);
-    cache2 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol);
-    cache3 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol);
+    cache0 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol,CACHE0_ID);
+    cache1 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol,CACHE1_ID);
+    cache2 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol,CACHE2_ID);
+    cache3 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol,CACHE3_ID);
     struct processor* pro0 = processor_init(input_file,0,cache0);
     //pro0->local_cache = cache0;
     struct processor* pro1 = processor_init(input_file,1,cache1);
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){
     Finish = 0;
     cycle = 0;
     //run the simulator
-    while(Finish == 0){
+    while(cycle < 200){
         processor_run(cycle,pro0);
         cache_run(cache0,cycle);
         processor_run(cycle,pro1);

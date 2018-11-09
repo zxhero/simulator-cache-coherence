@@ -22,6 +22,10 @@ void write_pipe(struct pipe* pipe, struct msg* msg){
     struct element *ele = malloc(sizeof(struct element));
     ele->msg = msg;
     struct element *entry, *next_entry;
+    if(list_empty(&pipe->head.head)){
+        list_add_head(&ele->head,&pipe->head.head);
+        return;
+    }
     list_for_each_entry_safe(entry,next_entry,&pipe->head.head,head){
         if(msg->cycle >= entry->msg->cycle && (next_entry->msg == NULL || msg->cycle < next_entry->msg->cycle)){
             list_insert(&ele->head,&entry->head,&next_entry->head);
