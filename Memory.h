@@ -44,14 +44,14 @@ struct memory * memory_init(){
     return mem;
 }
 
-unsigned int lookup_mem(unsigned int addr, struct memory *mem){
+struct mem_block * lookup_mem(unsigned int addr, struct memory *mem){
     struct mem_block *entry;
     list_for_each_entry(entry,&mem->blocks_in_cache->head,head){
         if(entry->addr == addr){
             return entry;
         }else continue;
     }
-    return 0;
+    return NULL;
 }
 
 void write_back(struct memory *mem, long int cycle){

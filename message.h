@@ -13,7 +13,7 @@
 #define STORE   0x20
 #define SUCCEED 0x40
 //dest or src
-#define BROADCAST   0xff
+#define BROADCAST   0x20
 #define CACHE0_ID   0x1
 #define CACHE1_ID   0x2
 #define CACHE2_ID   0x4

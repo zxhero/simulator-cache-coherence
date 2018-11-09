@@ -37,28 +37,29 @@ struct L1_cache{
 };
 
 struct L1_cache* cache_init(int cache_size, int associativity, int block_size, char* protocol){
-    int i, num_of_blocks, mask = 0xfffffffff;
+    int i, num_of_blocks;
+    unsigned int mask = 0xffffffff;
     struct L1_cache *local_cache = malloc(sizeof(struct L1_cache));
-    local_cache->pipe_from_bus = malloc(struct pipe);
+    local_cache->pipe_from_bus = malloc(sizeof(struct pipe));
     init_pipe(local_cache->pipe_from_bus);
-    local_cache->pipe_from_pro = malloc(struct pipe);
+    local_cache->pipe_from_pro = malloc(sizeof(struct pipe));
     init_pipe(local_cache->pipe_from_pro);
-    local_cache->pipe_to_bus = malloc(struct pipe);
+    local_cache->pipe_to_bus = malloc(sizeof(struct pipe));
     init_pipe(local_cache->pipe_to_bus);
-    local_cache->pipe_to_pro = malloc(struct pipe);
+    local_cache->pipe_to_pro = malloc(sizeof(struct pipe));
     init_pipe(local_cache->pipe_to_pro);
     local_cache->banks = calloc(associativity,sizeof(struct cache_bank));
     num_of_blocks = (cache_size >> 2)/block_size/associativity;
     local_cache->num_of_blocks = num_of_blocks;
     local_cache->num_of_banks = associativity;
     for(i =0;i < associativity;i++){
-        local_cache->banks[i].blocks = calloc(num_of_blocks)
+        local_cache->banks[i].blocks = calloc(num_of_blocks,sizeof(struct cache_block));
     }
     while(num_of_blocks > 1){
-        mask<<1;
-        num_of_blocks>>1;
+        mask <<= 1;
+        num_of_blocks >>= 1 ;
     }
-    mask ~= mask;
+    mask = ~mask;
     local_cache->set_index_mask = (mask<<2)*block_size;
     local_cache->block_size = block_size;
     if(protocol[0] == 'M')  local_cache->protocol = MESI;
@@ -71,8 +72,8 @@ struct cache_block* lookup_cache(struct L1_cache *cache, unsigned int addr){
     int i = 0;
     struct cache_block *block;
     for(i = 0;i < cache->num_of_banks;i++){
-        block = cache->banks[i].blocks[set_index];
-        if(block.addr == addr)  return &block;
+        block = cache->banks[i].blocks+set_index;
+        if(block->addr == addr)  return block;
         else continue;
     }
     return NULL;
@@ -83,15 +84,15 @@ struct cache_block* find_avaliable_block(struct L1_cache *cache, unsigned int ad
     int i = 0;
     struct cache_block *block;
     for(i = 0;i < cache->num_of_banks;i++){
-        block = cache->banks[i].blocks[set_index];
-        if(block.status == FREE)  return &block;
+        block = cache->banks[i].blocks+set_index;
+        if(block->status == FREE)  return block;
         else continue;
     }
     return cache->banks[0].blocks + set_index;
 };
 
 void cache_run(struct L1_cache *cache, long int cycle){
-    struct msg* pro_msg = peek_at_msg(cache->pipe_from_pro);
+    /*struct msg* pro_msg = peek_at_msg(cache->pipe_from_pro);
     struct msg* bus_msg = peek_at_msg(cache->pipe_from_bus);
     struct msg* rply_msg = NULL;
     struct cache_block *block = NULL;
@@ -119,7 +120,8 @@ void cache_run(struct L1_cache *cache, long int cycle){
             write_pipe(cache->pipe_to_bus,rply_msg);
         }
     }
-    return;
+    return;*/
+    
 };
 
 /*

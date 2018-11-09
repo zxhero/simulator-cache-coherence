@@ -1,6 +1,7 @@
 #ifndef PIPE
 #define PIPE
 #include<stdio.h>
+#include<string.h>
 #include"message.h"
 #include"list.h"
 
@@ -32,7 +33,7 @@ void write_pipe(struct pipe* pipe, struct msg* msg){
 struct msg* read_pipe(struct pipe* pipe){                           //read the first msg from pipe
     if(list_empty(&pipe->head.head))    return NULL;
     struct list_head *head = pipe->head.head.next;
-    struct element *ele = list_entry(head,struct element,head)
+    struct element *ele = list_entry(head,struct element,head);
     struct msg* msg = ele->msg;
     list_delete_entry(head);
     free(ele);
@@ -42,7 +43,7 @@ struct msg* read_pipe(struct pipe* pipe){                           //read the f
 struct msg* peek_at_msg(struct pipe* pipe){
     if(list_empty(&pipe->head.head))    return NULL;
     struct list_head *head = pipe->head.head.next;
-    struct element *ele = list_entry(head,struct element,head)
+    struct element *ele = list_entry(head,struct element,head);
     return ele->msg;
 };
 #endif // PIPE

@@ -40,12 +40,12 @@ int main(int argc, char *argv[]){
         cache_run(cache2,cycle);
         processor_run(cycle,pro3);
         cache_run(cache3,cycle);
-        bus_run(cycle);
+        bus_run(bus,cycle);
         memory_run(mem,cycle);
         cycle++;
     }
     //print results
     printf("protocol   benchmark  cycles\n");
-    printf("%s  %s  %d\n",protocol,input_file,cycle);
+    printf("%s  %s  %ld\n",protocol,input_file,cycle);
     return 0;
 }
