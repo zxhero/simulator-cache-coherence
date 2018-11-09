@@ -83,9 +83,6 @@ void bus_run(struct bus *bus, long int cycle){
     from_C3 = peek_at_msg(bus->pipe_from_C3);
     from_mem = peek_at_msg(bus->pipe_from_mem);
 
-    struct msg messages[4] = {from_C0, from_C1, from_C2, from_C3}; //Declares an array of 4 message
-
-
     if(from_C0 != NULL && from_C0->cycle == cycle && from_C0->operation == FLUSH){
         message = read_pipe(bus->pipe_from_C0);
         forward_msg(bus, message);
