@@ -76,7 +76,6 @@ void bus_run(struct bus *bus, long int cycle){
 
     struct msg *message = malloc(sizeof(struct msg));
 
-
     /* Reading in all the messages from the pipe*/ 
     from_C0 = peek_at_msg(bus->pipe_from_C0);
     from_C1 = peek_at_msg(bus->pipe_from_C1);
@@ -84,7 +83,42 @@ void bus_run(struct bus *bus, long int cycle){
     from_C3 = peek_at_msg(bus->pipe_from_C3);
     from_mem = peek_at_msg(bus->pipe_from_mem);
 
-    if(from_C0 != NULL && from_C0->cycle == cycle){
+    struct msg messages[4] = {from_C0, from_C1, from_C2, from_C3}; //Declares an array of 4 message
+
+
+    if(from_C0 != NULL && from_C0->cycle == cycle && from_C0->operation == FLUSH){
+        message = read_pipe(bus->pipe_from_C0);
+        forward_msg(bus, message);
+    }
+    else if(from_C1 != NULL && from_C1->cycle == cycle && from_C1->operation == FLUSH){
+        message = read_pipe(bus->pipe_from_C1);
+        forward_msg(bus, message);
+    }
+    else if(from_C2 != NULL && from_C2->cycle == cycle && from_C2->operation == FLUSH){
+        message = read_pipe(bus->pipe_from_C2);
+        forward_msg(bus, message);
+    }
+    else if(from_C3 != NULL && from_C3->cycle == cycle && from_C3->operation == FLUSH){
+        message = read_pipe(bus->pipe_from_C3);
+        forward_msg(bus, message);
+    }
+    else if(from_C0 != NULL && from_C0->cycle == cycle && from_C0->operation == BUSUPD){
+        message = read_pipe(bus->pipe_from_C0);
+        forward_msg(bus, message);
+    }
+    else if(from_C1 != NULL && from_C1->cycle == cycle && from_C1->operation == BUSUPD){
+        message = read_pipe(bus->pipe_from_C1);
+        forward_msg(bus, message);
+    }
+    else if(from_C2 != NULL && from_C2->cycle == cycle && from_C2->operation == BUSUPD){
+        message = read_pipe(bus->pipe_from_C2);
+        forward_msg(bus, message);
+    }
+    else if(from_C3 != NULL && from_C3->cycle == cycle && from_C3->operation == BUSUPD){
+        message = read_pipe(bus->pipe_from_C3);
+        forward_msg(bus, message);
+    }
+    else if(from_C0 != NULL && from_C0->cycle == cycle){ //All bus operations have the same priority
         message = read_pipe(bus->pipe_from_C0);
         forward_msg(bus, message);
     }
