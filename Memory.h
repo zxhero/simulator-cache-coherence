@@ -74,16 +74,11 @@ void memory_run(struct memory *mem, long int cycle){
         if(request->msg->cycle <= cycle){
             unsigned int addr = request->msg->addr;
             struct mem_block *entry = lookup_mem(addr,mem);
-            if(request->msg->operation & (BUSRD | BUSRDX) != 0){                                      //read mem
+            if((request->msg->operation & (BUSRD | BUSRDX)) != 0){                                      //read mem
                 if(entry == NULL){
                     struct msg *reply = malloc(sizeof(struct msg));
                     memset(reply,0,sizeof(struct msg));
-                    reply->operation = request->msg->operation | REPLY;
-                    reply->addr = addr;
-                    reply->cycle = 100;
-                    reply->dest = request->msg->src;
-                    reply->src = MEMORY_ID;
-                    write_pipe(mem->pipe_to_bus,reply);
+                    send_message(reply,cycle + 100,request->msg->operation | REPLY,0,addr,request->msg->src,MEMORY_ID,mem->pipe_to_bus);
                     entry = malloc(sizeof(struct mem_block));
                     entry->addr = addr;
                     entry->state = BLOCK_IN_CACHE;
@@ -92,15 +87,10 @@ void memory_run(struct memory *mem, long int cycle){
                     if(entry->state == BLOCK_WBACK){
                         struct msg *reply = malloc(sizeof(struct msg));
                         memset(reply,0,sizeof(struct msg));
-                        reply->operation = request->msg->operation | REPLY;
-                        reply->addr = addr;
-                        reply->cycle = entry->cycle + 100;
-                        reply->dest = request->msg->src;
-                        reply->src = MEMORY_ID;
-                        write_pipe(mem->pipe_to_bus,reply);
+                        send_message(reply,entry->cycle + 100,request->msg->operation | REPLY,0,addr,request->msg->src,MEMORY_ID,mem->pipe_to_bus);
                     }
                 }
-            }else if(request->msg->operation & FLUSH != 0){                                  //write mem
+            }else if((request->msg->operation & FLUSH) != 0){                                  //write mem
                 entry->state = BLOCK_WBACK;
                 entry->cycle = cycle + 100;
             }else{

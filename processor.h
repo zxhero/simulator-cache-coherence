@@ -12,7 +12,7 @@
 struct processor{
     int pro_id;
     FILE *benchmark;
-    long int cycle; //To set when the processor is free again when it is stalled 
+    long int cycle; //To set when the processor is free again when it is stalled
     int state; // 0 for free and 1 for wait for memory and 2 for wait for computation and 4 for end of work
     struct L1_cache *local_cache;
     struct pipe *pipe_to_cache;
@@ -39,7 +39,7 @@ struct processor* processor_init(char *input_file, int pro_id,struct L1_cache *l
 
 void processor_run(long int cycle, struct processor *proc){
     //printf("processor %d run...\n",proc->pro_id);
-	unsigned int addr; //To store the value of the address 
+	unsigned int addr; //To store the value of the address
 	int label; //To store the value of the label
 	if(proc->state == 1 && peek_at_msg(proc->pipe_from_cache) != NULL){ //There is a message from the cache
 		struct msg * rply = read_pipe(proc->pipe_from_cache);
@@ -51,7 +51,7 @@ void processor_run(long int cycle, struct processor *proc){
 	else if(proc->state == 2 && proc->cycle == cycle){ //Check if the processor is stalling for computation
 		proc->state = 0; //Make the processor free again
 		return;
-	}	
+	}
 	else if(proc->state == 0){ //Processor is free & check for labels and the addr
 		//proc->cycle++; //Increase the proc cycle
 
@@ -63,21 +63,22 @@ void processor_run(long int cycle, struct processor *proc){
         }; //Scans in the values and the labels
         printf("cycle %ld, processor %d read 0x%x\n",cycle,proc->pro_id,addr);
 		struct msg *message = malloc(sizeof(struct msg)); //Creates a new message
+		memset(message,0,sizeof(struct msg));
 		if(label == 0){ //Load instruction
             proc->state = 1;
 			message->operation = LOAD;
 			message->cycle = cycle+1;
 			message->addr = addr;
-			write_pipe(proc->pipe_to_cache, message); //Passes the messsage to the pipe to be sent to the cache 
+			write_pipe(proc->pipe_to_cache, message); //Passes the messsage to the pipe to be sent to the cache
 		}
 		else if(label == 1){ //Store instruction
             proc->state = 1;
 			message->operation = STORE;
 			message->cycle = cycle+1;
 			message->addr = addr;
-			write_pipe(proc->pipe_to_cache, message); //Passes the messsage to the pipe to be sent to the cache 
-		} 
-		else if(label == 2) { //Computation instruction 
+			write_pipe(proc->pipe_to_cache, message); //Passes the messsage to the pipe to be sent to the cache
+		}
+		else if(label == 2) { //Computation instruction
             proc->state = 2;
 			proc->cycle = cycle + addr;
 			return;
@@ -86,7 +87,7 @@ void processor_run(long int cycle, struct processor *proc){
 			printf("error in labels!");
 			exit(1);
 		}
-		
+
 	}
 };
 #endif // PROCESSOR

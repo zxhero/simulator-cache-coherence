@@ -32,5 +32,15 @@ struct msg{
     int dest;
     int src;
 };
+#include"pipe.h"
+void send_message(struct msg *msg, long int cycle, int operation, unsigned int shared_line, unsigned int addr, int dest, int src, struct pipe *pipe){
+    msg->cycle = cycle;
+    msg->dest = dest;
+    msg->operation = operation;
+    msg->shared_line = shared_line;
+    msg->addr = addr;
+    msg->src = src;
+    write_pipe(pipe,msg);
+}//uesd for caches and memory
 #endif // MESSAGE
 
