@@ -2,16 +2,15 @@
 #define MESSAGE
 #include<stdio.h>
 //operation of bus
-#define REPLY   0x0
-//#define REPLYX  0x1
+#define REPLY  0x1
 #define BUSUPD  0x2
 #define FLUSH   0x4
 #define BUSRD   0x8
 #define BUSRDX  0x10
 //operation of CPU
-#define LOAD    0x10
-#define STORE   0x20
-#define SUCCEED 0x40
+#define LOAD    0x20
+#define STORE   0x40
+#define SUCCEED 0x80
 //dest or src
 #define BROADCAST   0x20
 #define CACHE0_ID   0x1

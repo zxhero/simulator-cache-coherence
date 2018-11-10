@@ -78,6 +78,7 @@ void memory_run(struct memory *mem, long int cycle){
                 if(entry == NULL){
                     struct msg *reply = malloc(sizeof(struct msg));
                     memset(reply,0,sizeof(struct msg));
+                    reply->operation = request->msg->operation | REPLY;
                     reply->addr = addr;
                     reply->cycle = 100;
                     reply->dest = request->msg->src;
@@ -91,6 +92,7 @@ void memory_run(struct memory *mem, long int cycle){
                     if(entry->state == BLOCK_WBACK){
                         struct msg *reply = malloc(sizeof(struct msg));
                         memset(reply,0,sizeof(struct msg));
+                        reply->operation = request->msg->operation | REPLY;
                         reply->addr = addr;
                         reply->cycle = entry->cycle + 100;
                         reply->dest = request->msg->src;
@@ -107,6 +109,7 @@ void memory_run(struct memory *mem, long int cycle){
         }
         else break;
         list_delete_entry(&request->head);
+        free(request->msg);
         free(request);
     }
     /* test */
@@ -118,7 +121,7 @@ void memory_run(struct memory *mem, long int cycle){
         printf("cycle %ld, memory recieve requst from cache %d, and wait %ld\n",cycle, request->src,request->cycle - cycle);
         request->dest = request->src;
         request->src = MEMORY_ID;
-        
+
         write_pipe(mem->pipe_to_bus, request);
     }
     return;*/
