@@ -1,8 +1,8 @@
 #ifndef CACHE
 #define CACHE
 #include<stdio.h>
-#include"pipe.h"
 #include"message.h"
+#include"pipe.h"
 #define MESI    1
 #define DRAGON  2
 //shared line value
@@ -10,13 +10,30 @@
 #define PROCESSOR1_HAVE     0x2
 #define PROCESSOR2_HAVE     0x4
 #define PROCESSOR3_HAVE     0x8
-//cache status
-#define FREE    1
+#define PROCESSOR0_MODIFY    0x10
+#define PROCESSOR1_MODIFY    0x20
+#define PROCESSOR2_MODIFY    0x40
+#define PROCESSOR3_MODIFY    0x80
+//cache block status
+#define INVALID    0
+#define MODIFY     1
+#define EXCLUSIVE   2
+//cache block status for MESI
+#define SHARED      3
+//cache block status for DRAGON
+#define SHARED_CLEAN    4
+#define SHARED_MODIFY   5
+//cache status.
+#define WORKING     0
+#define PRWRMISS    1
+#define PRRDMISS    2
 
 struct cache_block{
     unsigned int addr;
     int status;
     unsigned int shared_line;
+    /*In dragon protocol, low 4 bits in shared line represents whether each cache has same data,
+    and 5-8 bit implies whether there is any cache modifing this data*/
 };
 struct cache_bank{
     struct cache_block *blocks; //array of cache blocks. Need to create based on input.
@@ -33,6 +50,8 @@ struct L1_cache{
     int block_size;
     char protocol;
     char id;
+    /*In dragon protocol, cache may stall for store or read miss*/
+    char status;
 };
 
 #include"Dragon.h"
@@ -77,7 +96,7 @@ struct cache_block* lookup_cache(struct L1_cache *cache, unsigned int addr){
     struct cache_block *block;
     for(i = 0;i < cache->num_of_banks;i++){
         block = cache->banks[i].blocks+set_index;
-        if(block->addr == addr)  return block;
+        if(block->addr == addr && block->status != INVALID)  return block;
         else continue;
     }
     return NULL;
@@ -89,41 +108,33 @@ struct cache_block* find_avaliable_block(struct L1_cache *cache, unsigned int ad
     struct cache_block *block;
     for(i = 0;i < cache->num_of_banks;i++){
         block = cache->banks[i].blocks+set_index;
-        if(block->status == FREE)  return block;
+        if(block->status == INVALID)  return block;
         else continue;
     }
-    return cache->banks[0].blocks + set_index;
+    return cache->banks[rand()%cache->num_of_banks].blocks + set_index;
 };
 
 void cache_run(struct L1_cache *cache, long int cycle){
     //printf("cache %d run...\n",cache->id);
     struct msg* pro_msg = peek_at_msg(cache->pipe_from_pro);
     struct msg* bus_msg = peek_at_msg(cache->pipe_from_bus);
-    struct msg* rply_msg = NULL;
     struct cache_block *block = NULL;
     if(pro_msg != NULL && pro_msg->cycle == cycle){
         pro_msg = read_pipe(cache->pipe_from_pro);
         block = lookup_cache(cache,pro_msg->addr);
             if(cache->protocol == DRAGON){
-                rply_msg = handle_msg_fromCPU_dragon(block,pro_msg);
+                handle_msg_fromCPU_dragon(block,pro_msg,cache);
             }else{
-                rply_msg = handle_msg_fromCPU_MESI(block,pro_msg);
+                handle_msg_fromCPU_MESI(block,pro_msg,cache);
             }
     }else if(bus_msg != NULL && bus_msg->cycle == cycle){
         bus_msg = read_pipe(cache->pipe_from_bus);
         block = lookup_cache(cache,bus_msg->addr);
             if(cache->protocol == DRAGON){
-                rply_msg = handle_msg_fromBUS_dragon(block,bus_msg);
+                handle_msg_fromBUS_dragon(block,bus_msg,cache,cycle);
             }else{
-                rply_msg = handle_msg_fromBUS_MESI(block,bus_msg);
+                handle_msg_fromBUS_MESI(block,bus_msg,cache);
             }
-    }
-    if(rply_msg != NULL){
-        if(rply_msg->dest == PROCESSOR_ID){
-            write_pipe(cache->pipe_to_pro,rply_msg);
-        }else{
-            write_pipe(cache->pipe_to_bus,rply_msg);
-        }
     }
     return;
     /*

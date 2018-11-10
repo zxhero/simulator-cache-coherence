@@ -78,7 +78,7 @@ void memory_run(struct memory *mem, long int cycle){
                 if(entry == NULL){
                     struct msg *reply = malloc(sizeof(struct msg));
                     memset(reply,0,sizeof(struct msg));
-                    send_message(reply,cycle + 100,request->msg->operation | REPLY,0,addr,request->msg->src,MEMORY_ID,mem->pipe_to_bus);
+                    send_message(reply,cycle + 100,request->msg->operation | REPLY,request->msg->src,addr,request->msg->src,MEMORY_ID,mem->pipe_to_bus);
                     entry = malloc(sizeof(struct mem_block));
                     entry->addr = addr;
                     entry->state = BLOCK_IN_CACHE;
@@ -87,7 +87,7 @@ void memory_run(struct memory *mem, long int cycle){
                     if(entry->state == BLOCK_WBACK){
                         struct msg *reply = malloc(sizeof(struct msg));
                         memset(reply,0,sizeof(struct msg));
-                        send_message(reply,entry->cycle + 100,request->msg->operation | REPLY,0,addr,request->msg->src,MEMORY_ID,mem->pipe_to_bus);
+                        send_message(reply,entry->cycle + 100,request->msg->operation | REPLY,request->msg->src,addr,request->msg->src,MEMORY_ID,mem->pipe_to_bus);
                     }
                 }
             }else if((request->msg->operation & FLUSH) != 0){                                  //write mem

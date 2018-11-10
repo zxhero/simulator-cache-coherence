@@ -18,7 +18,7 @@
 #define CACHE2_ID   0x4
 #define CACHE3_ID   0x8
 #define MEMORY_ID   0x10
-#define PROCESSOR_ID    0x20
+#define PROCESSOR_ID    0x40
 //reply information
 #define NOT_FOUND   0x1
 #define FOUND       0x2
