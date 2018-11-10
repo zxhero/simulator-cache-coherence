@@ -24,7 +24,41 @@ Initializing simulator, parsing input and running simulator based on the configu
 5.	If processor's clock equals to N, changing status to free, otherwise do nothing. Return.
 6.	Check the pipe from cache, if there is message's operation equalling to reply, changing status to free, otherwise do nothing. Return.
 ### Cache.h & MESI.h & Dragon.h
-1.	
+##### cache.h:    
+
+1.	If there are message from the processor, call handle\_msg\_fromCPU\_dragon or handle\_msg\_fromCPU\_MESI depending on protocol.
+2.	Else if there are message from the bus, call handle\_msg\_fromBUS\_dragon or handle\_msg\_fromBUS\_MESI depending on protocol.
+
+##### Dragon.h (contain functions handle\_msg\_fromBUS\_dragon and handle\_msg\_fromCPU\_dragon) 
+![dragon](https://github.com/zxhero/simulator-cache-coherence/blob/master/dragon_protocol_diagram.PNG)
+
+* handle\_msg\_fromBUS\_dragon: 
+
+	1.	If operation is reply for busrd, we may evict a old cache block. We change this new cache block status to SM (we also need to send busupd) or M, and change shared line. Then we change cache status to working. Finally, we send data to processor. return.
+	2.	If operation is busupd, we change shared line, and change the cache block status to Sc. return.
+	3.	If operation is busrd, we may send back data depending on shared line, and change the cache status and shared line accordingly. return.
+	4.	If operation is flush, we only change shared line.
+	
+* handle\_msg\_fromCPU\_dragon:
+
+	2.	If load miss, we change cache status to PrRdMiss, and send busrd. return.
+	3.	If load hit, we send back data to processor. return.
+	4.	If store miss, we change cache status to PrWrMiss, and send busrd. return.
+	5.	If store hit, we check the cache block's status. 
+	6.	If the cache block's status is E, we change the cache block status to M, and change shared line. return.
+	7.	If the cache block's status is Sc, we change cache block status to SM or M, send busupd, and change shared line. return.
+	8.	If the cache block's status is SM, we send busupd, and change the cache block status to M depending on shared line. return.
+
+
+##### MESI.h (contain functions handle\_msg\_fromBUS\_MESI and handle\_msg\_fromCPU\_MESI) 
+![MESI](https://github.com/zxhero/simulator-cache-coherence/blob/master/MESI_protocol_diagram.PNG)
+
+* handle\_msg\_fromCPU\_MESI
+	
+	1.	
+* handle\_msg\_fromBUS\_MESI
+
+
 ### Bus.h
 1.	Scan those pipes from each cache and memory. 
 2.	If there is one message with message's cycle equals to or less than N, the bus sends it to dest.
