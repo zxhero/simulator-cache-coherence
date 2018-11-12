@@ -102,7 +102,7 @@ struct cache_block* lookup_cache(struct L1_cache *cache, unsigned int addr){
     return NULL;
 }; //return the pointer of cache block
 
-struct cache_block* find_avaliable_block(struct L1_cache *cache, unsigned int addr){
+struct cache_block* find_available_block(struct L1_cache *cache, unsigned int addr){
     int set_index = ((addr & cache->set_index_mask) >> 2)/cache->block_size;
     int i = 0;
     struct cache_block *block;

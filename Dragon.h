@@ -44,7 +44,7 @@ void handle_msg_fromCPU_dragon(struct cache_block* block, struct msg* msg, struc
 
 void handle_msg_fromBUS_dragon(struct cache_block* block, struct msg* msg, struct L1_cache *cache,long int cycle){
     if((msg->operation & REPLY) != 0 && (msg->operation & BUSRD) != 0){         //reply for busrd
-        struct cache_block *new_block = find_avaliable_block(cache,msg->addr);
+        struct cache_block *new_block = find_available_block(cache,msg->addr);
         if(new_block->status != INVALID){           //evict old cache block
             struct msg* evict_msg = calloc(1,sizeof(struct msg));
             if((new_block->shared_line & 0xf0) == (cache->id << 4)){        //this cache modifies it
