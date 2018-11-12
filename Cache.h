@@ -54,9 +54,6 @@ struct L1_cache{
     char status;
 };
 
-#include"Dragon.h"
-#include"MESI.h"
-
 struct L1_cache* cache_init(int cache_size, int associativity, int block_size, char* protocol, char id){
     printf("cache %c init....\n",'0'+id);
     int i, num_of_blocks;
@@ -72,7 +69,7 @@ struct L1_cache* cache_init(int cache_size, int associativity, int block_size, c
     local_cache->pipe_to_pro = malloc(sizeof(struct pipe));
     init_pipe(local_cache->pipe_to_pro);
     local_cache->banks = calloc(associativity,sizeof(struct cache_bank));
-    num_of_blocks = (cache_size >> 2)/block_size/associativity;
+    num_of_blocks = (cache_size)/block_size/associativity;
     local_cache->num_of_blocks = num_of_blocks;
     local_cache->num_of_banks = associativity;
     for(i =0;i < associativity;i++){
@@ -83,15 +80,15 @@ struct L1_cache* cache_init(int cache_size, int associativity, int block_size, c
         num_of_blocks >>= 1 ;
     }
     mask = ~mask;
-    local_cache->set_index_mask = (mask<<2)*block_size;
+    local_cache->set_index_mask = (mask)*block_size;
     local_cache->block_size = block_size;
     if(protocol[0] == 'M')  local_cache->protocol = MESI;
     else    local_cache->protocol = DRAGON;
 };
 
 struct cache_block* lookup_cache(struct L1_cache *cache, unsigned int addr){
-    int set_index = ((addr & cache->set_index_mask) >> 2)/cache->block_size;
-    addr = (addr>>2)/cache->block_size;
+    int set_index = ((addr & cache->set_index_mask) )/cache->block_size;
+    addr = (addr)/cache->block_size;
     int i = 0;
     struct cache_block *block;
     for(i = 0;i < cache->num_of_banks;i++){
@@ -103,7 +100,7 @@ struct cache_block* lookup_cache(struct L1_cache *cache, unsigned int addr){
 }; //return the pointer of cache block
 
 struct cache_block* find_available_block(struct L1_cache *cache, unsigned int addr){
-    int set_index = ((addr & cache->set_index_mask) >> 2)/cache->block_size;
+    int set_index = ((addr & cache->set_index_mask))/cache->block_size;
     int i = 0;
     struct cache_block *block;
     for(i = 0;i < cache->num_of_banks;i++){
@@ -114,12 +111,16 @@ struct cache_block* find_available_block(struct L1_cache *cache, unsigned int ad
     return cache->banks[rand()%cache->num_of_banks].blocks + set_index;
 };
 
+#include"Dragon.h"
+#include"MESI.h"
+
 void cache_run(struct L1_cache *cache, long int cycle){
     //printf("cache %d run...\n",cache->id);
     struct msg* pro_msg = peek_at_msg(cache->pipe_from_pro);
     struct msg* bus_msg = peek_at_msg(cache->pipe_from_bus);
     struct cache_block *block = NULL;
     if(pro_msg != NULL && pro_msg->cycle == cycle){
+        printf("cycle %ld,cache %d read from pro. ",cycle, cache->id);
         pro_msg = read_pipe(cache->pipe_from_pro);
         block = lookup_cache(cache,pro_msg->addr);
             if(cache->protocol == DRAGON){
@@ -127,13 +128,14 @@ void cache_run(struct L1_cache *cache, long int cycle){
             }else{
                 handle_msg_fromCPU_MESI(block,pro_msg,cache);
             }
-    }else if(bus_msg != NULL && bus_msg->cycle == cycle){
+    }else if(bus_msg != NULL && bus_msg->cycle <= cycle){
+        printf("cycle %ld, cache %d read from bus, src: %d. ",cycle, cache->id,bus_msg->src);
         bus_msg = read_pipe(cache->pipe_from_bus);
         block = lookup_cache(cache,bus_msg->addr);
             if(cache->protocol == DRAGON){
                 handle_msg_fromBUS_dragon(block,bus_msg,cache,cycle);
             }else{
-                handle_msg_fromBUS_MESI(block,bus_msg,cache);
+                handle_msg_fromBUS_MESI(block,bus_msg,cache,cycle);
             }
     }
     return;

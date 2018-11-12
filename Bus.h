@@ -72,7 +72,7 @@ void forward_msg(struct bus *bus, struct msg *message){
     }
 
     if((message->dest & CACHE0_ID) != 0){
-        printf("bus dest: %d\n",message->dest);
+       // printf("bus dest: %d\n",message->dest);
         struct msg *msg1 = malloc(sizeof(struct msg));
         memcpy(msg1,message,sizeof(struct msg));
         write_pipe(bus->pipe_to_C0,msg1);
@@ -93,7 +93,7 @@ void forward_msg(struct bus *bus, struct msg *message){
         write_pipe(bus->pipe_to_C3,msg1);
     }
     if((message->dest & MEMORY_ID) != 0){
-        printf("cycle %ld,bus!\n",message->cycle);
+        //printf("cycle %ld,bus!\n",message->cycle);
         struct msg *msg1 = malloc(sizeof(struct msg));
         memcpy(msg1,message,sizeof(struct msg));
         write_pipe(bus->pipe_to_mem,msg1);

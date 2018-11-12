@@ -43,7 +43,7 @@ void processor_run(long int cycle, struct processor *proc){
 	int label; //To store the value of the label
 	if(proc->state == 1 && peek_at_msg(proc->pipe_from_cache) != NULL){ //There is a message from the cache
 		struct msg * rply = read_pipe(proc->pipe_from_cache);
-        printf("cycle %ld, processor %d get 0x%x\n",cycle,proc->pro_id,rply->addr);
+        printf("cycle %ld, processor %d get 0x%x\n",cycle,1<<proc->pro_id,rply->addr);
 		proc->state = 0; //Make the processor free again
         free(rply);
 		return;
@@ -57,11 +57,11 @@ void processor_run(long int cycle, struct processor *proc){
 
 		if(fscanf(proc->benchmark, "%d %x", &label, &addr) == EOF){
             proc->state = 4;
-            printf("cycle %ld, processor %d end...\n",cycle,proc->pro_id);
+            printf("cycle %ld, processor %d end...\n",cycle,1<<proc->pro_id);
             exit(1);
             return;
         }; //Scans in the values and the labels
-        printf("cycle %ld, processor %d read 0x%x\n",cycle,proc->pro_id,addr);
+        printf("cycle %ld, processor %d read 0x%x\n",cycle,1<<proc->pro_id,addr);
 		struct msg *message = malloc(sizeof(struct msg)); //Creates a new message
 		memset(message,0,sizeof(struct msg));
 		if(label == 0){ //Load instruction
