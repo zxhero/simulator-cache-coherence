@@ -21,7 +21,7 @@ COHERENCE: simulator.o
 	$(LD) $(LDFLAGS) simulator.o -o coherence 
 	
 clean:
-	rm -f *.o client local_dns dns
+	rm -f *.o coherence
 
 tags: $(SRCS) $(HDRS)
 	ctags $(SRCS) $(HDRS)
