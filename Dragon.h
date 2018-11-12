@@ -1,6 +1,7 @@
 #ifndef _DRAGON_
 #define _DRAGON_
 #include "Cache.h"
+#include "message.h"
 
 void handle_msg_fromCPU_dragon(struct cache_block* block, struct msg* msg, struct L1_cache *cache){
     if(msg->operation == LOAD){                     //load
