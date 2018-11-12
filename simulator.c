@@ -26,12 +26,12 @@ int main(int argc, char *argv[]){
     //pro2->local_cache = cache2;
     struct processor* pro3 = processor_init(input_file,3,cache3);
     //pro3->local_cache = cache3;
-    struct memory *mem = memory_init();
+    struct memory *mem = memory_init(atoi(block_size));
     struct bus *bus = bus_init(cache0,cache1,cache2,cache3,mem);
     Finish = 0;
     cycle = 0;
     //run the simulator
-    while(cycle < 200){
+    while(pro0->state != 4 || pro1->state != 4||pro2->state != 4 ||pro3->state != 4){
         processor_run(cycle,pro0);
         cache_run(cache0,cycle);
         processor_run(cycle,pro1);
