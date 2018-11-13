@@ -82,7 +82,7 @@ void memory_run(struct memory *mem, long int cycle){
             struct mem_block *entry = lookup_mem(addr,mem);
             if((request->msg->operation & (BUSRD | BUSRDX)) != 0){                                      //read mem
                 if(entry == NULL){
-                    printf("cycle %ld, mem will send back data to cahce%d in 100 cycle.\n",cycle,request->msg->src);
+                    printf("cycle %ld, mem will send back data to cache%d in 100 cycle.\n",cycle,request->msg->src);
                     struct msg *reply = malloc(sizeof(struct msg));
                     memset(reply,0,sizeof(struct msg));
                     //printf("CHECK2\n");
@@ -96,7 +96,7 @@ void memory_run(struct memory *mem, long int cycle){
                     list_add_head(&entry->head,&mem->blocks_in_cache->head);
                 }else{
                     if(entry->state == BLOCK_WBACK){
-                        printf("cycle %ld, mem will send back data to cahce%d in %ld cycle.\n",cycle,request->msg->src,entry->cycle + 100 - cycle);
+                        printf("cycle %ld, mem will send back data to cache%d in %ld cycle.\n",cycle,request->msg->src,entry->cycle + 100 - cycle);
                         entry->state = BLOCK_IN_CACHE;
                         struct msg *reply = malloc(sizeof(struct msg));
                         memset(reply,0,sizeof(struct msg));
