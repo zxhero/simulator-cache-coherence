@@ -7,10 +7,12 @@ void handle_msg_fromCPU_MESI(struct cache_block* block, struct msg* msg,struct L
 
 	if(block -> status == NULL && msg -> operation == LOAD){ //Load Miss 
 		printf("Load miss!\n");
+		send_message(msg,msg->cycle+1,BUSRD,0,msg->addr,BROADCAST,cache->id,cache->pipe_to_bus); //Send the value to the bus to request for the value
 		/* Snoop */
 	}
 	else if(block -> status == NULL && msg -> operation == STORE){ //Write miss 
 		printf("Write miss!\n");
+		send_message(msg,msg->cycle+1,BUSRD,0,msg->addr,BROADCAST,cache->id,cache->pipe_to_bus); //Send the value to the bus
 		/* Snoop */
 	}
     else if(block -> status == INVALID){
