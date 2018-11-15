@@ -40,8 +40,8 @@ int main(int argc, char *argv[]){
         cache_run(cache2,cycle);
         processor_run(cycle,pro3);
         cache_run(cache3,cycle);
-        bus_run(bus,cycle);
         memory_run(mem,cycle);
+        bus_run(bus,cycle);
         cycle++;
     }
     //print results
