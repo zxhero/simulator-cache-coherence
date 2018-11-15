@@ -111,6 +111,17 @@ struct cache_block* find_available_block(struct L1_cache *cache, unsigned int ad
     return cache->banks[rand()%cache->num_of_banks].blocks + set_index;
 };
 
+void show_cache(struct L1_cache *cache){
+    int i,j;
+    for(i = 0; i < cache->num_of_blocks; i++){
+        printf("set %d: ",i);
+        for(j = 0; j < cache->num_of_banks; j++){
+            printf("%x ",cache->banks[j].blocks[i].addr * cache->block_size);
+        }
+        printf("\n");
+    }
+};
+
 #include"Dragon.h"
 #include"MESI.h"
 
