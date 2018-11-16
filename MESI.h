@@ -24,6 +24,7 @@ void handle_msg_fromCPU_MESI(struct cache_block* block, struct msg* msg,struct L
     		else{
     			block -> status = SHARED;
     		}
+    		
     		/*Wait and read all messages from all other caches. 
     		  If one of the other caches have the valid block, then the state is changed to shared.
 			  Else if none of the other caches have the valid block, then the state is changed to Exclusive.  
@@ -35,16 +36,17 @@ void handle_msg_fromCPU_MESI(struct cache_block* block, struct msg* msg,struct L
     		/*Wait and read all messages from all other caches. 
     		  If one of the other caches have the valid block, then they will send the value otherwise they will fetch from main memory 
     		*/
+
     	}
     }
     else if(block -> status == EXCLUSIVE){ 
     	if(msg -> operation == LOAD){ //PrRd, Exclusive
     		//Nothing happens, cache hit
-    		printf("cache hit!\n"); 
+    		printf("read hit!\n"); 
     		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro); //Send the value to the proc
     	}
     	else if(msg -> operation == STORE){ //PrWr, Exclusive 
-    		printf("cache hit!\n");
+    		printf("write hit!\n");
     		block -> status  =  MODIFY; //Status changes to modified
     		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro); //Tell the proc that the modify was successful
     	}
@@ -52,23 +54,23 @@ void handle_msg_fromCPU_MESI(struct cache_block* block, struct msg* msg,struct L
     else if(block -> status  == MODIFY){ //
     	if(msg -> operation == LOAD){ //PrRd, Modified
     		//Nothing happens
-    		printf("cache hit!\n");
+    		printf("read hit!\n");
     		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro); //Send the value to the proc
     	}
     	else if(msg -> operation == STORE){ //PRWr, Modified
     		//Nothing happens 
-    		printf("cache hit!\n");
+    		printf("write hit!\n");
     		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro); //Send the value to the proc
     	}
     }
     else if(block -> status == SHARED){ 
     	if(msg -> operation ==  LOAD){ //PrRd, Shared
     		//Nothing happens
-    		printf("cache hit!\n"); 
+    		printf("read hit!\n"); 
     		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro); //Send the value to the proc
     	}
     	else if(msg -> operation == STORE){ //PrWr, Shared
-    		printf("cache hit!\n");
+    		printf("write hit!\n");
     		block -> status = MODIFY; //State changes to modfied because this cache has the latest copy
     		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro); //Send the value to the proc
     	}	
@@ -81,6 +83,7 @@ void handle_msg_fromCPU_MESI(struct cache_block* block, struct msg* msg,struct L
 void handle_msg_fromBUS_MESI(struct cache_block* block, struct msg* msg,struct L1_cache *cache,long int cycle, struct directory *dir){
 	if((msg -> operation & REPLY) != 0 && ((msg->operation & BUSRD) != 0 || (msg->operation & BUSRDX) !=0 )){ //Reply for bus read or bus read X
 		struct cache_block *new_block = find_available_block(cache, msg->addr);
+		new_block->addr = msg->addr/cache->block_size;
 		printf("msg is reply!\n");
 		if(new_block->status != INVALID){ //evict old cache block
 			unsigned int evict_addr = new_block->addr * cache->block_size;
@@ -101,7 +104,7 @@ void handle_msg_fromBUS_MESI(struct cache_block* block, struct msg* msg,struct L
 		else{ //Handle cold miss
 			printf("cold miss\n");
 			new_block->status = EXCLUSIVE;
-			new_block->addr = msg->addr/cache->block_size;
+			
 		}
 		send_message(msg,cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,0,cache->pipe_to_pro);
 	}
