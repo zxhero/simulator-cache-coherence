@@ -58,7 +58,8 @@ void processor_run(long int cycle, struct processor *proc){
 		if(fscanf(proc->benchmark, "%d %x", &label, &addr) == EOF){
             proc->state = 4;
             printf("cycle %ld, processor %d end...\n",cycle,1<<proc->pro_id);
-            exit(1);
+            int i;
+            scanf("%d",&i);
             return;
         }; //Scans in the values and the labels
         printf("cycle %ld, processor %d read 0x%x\n",cycle,1<<proc->pro_id,addr);
@@ -66,6 +67,7 @@ void processor_run(long int cycle, struct processor *proc){
 		memset(message,0,sizeof(struct msg));
 		if(label == 0){ //Load instruction
             proc->state = 1;
+            proc->cycle = cycle;
 			message->operation = LOAD;
 			message->cycle = cycle+1;
 			message->addr = addr;
@@ -73,6 +75,7 @@ void processor_run(long int cycle, struct processor *proc){
 		}
 		else if(label == 1){ //Store instruction
             proc->state = 1;
+            proc->cycle = cycle;
 			message->operation = STORE;
 			message->cycle = cycle+1;
 			message->addr = addr;
@@ -88,7 +91,10 @@ void processor_run(long int cycle, struct processor *proc){
 			exit(1);
 		}
 
-	}
+	}else if(proc->state == 1 && (proc->cycle + 500) == cycle){
+        printf("something wrong with processor %d \n",1<<proc->pro_id);
+        exit(1);
+    }
 };
 #endif // PROCESSOR
 
