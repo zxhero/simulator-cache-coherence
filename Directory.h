@@ -38,5 +38,33 @@ int check_cache_block_in_all(struct directory *dir,struct cache_block *block){ /
 	return 0; //Not found 
 }
 
+int check_cache_0(struct directory *dir, struct cache_block *block){
+	if(lookup_cache(dir->cache0, block->addr) != NULL){
+		return 1; //Means the block exists 
+	}
+	return 0;
+}
+
+int check_cache_1(struct directory *dir, struct cache_block *block){
+	if(lookup_cache(dir->cache1, block->addr) != NULL){
+		return 1; //Means the block exists
+	}
+	return 0;
+}
+
+int check_cache_2(struct directory *dir, struct cache_block *block){
+	if(lookup_cache(dir->cache2, block->addr) != NULL){
+		return 1; //Means the block exists
+	}
+	return 0;
+}
+
+int check_cache_3(struct directory *dir, struct cache_block *block){
+	if(lookup_cache(dir->cache3, block->addr) != NULL){
+		return 1;
+	}
+	return 0;
+}
+
 #endif // DIRECTORY
 
