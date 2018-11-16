@@ -3,14 +3,14 @@
 #include"Cache.h"
 #include"Directory.h"
 
-void handle_msg_fromCPU_MESI(struct cache_block* block, struct msg* msg,struct L1_cache *cache. struct directory *dir){
+void handle_msg_fromCPU_MESI(struct cache_block* block, struct msg* msg,struct L1_cache *cache, struct directory *dir){
 
-	if(block -> status == NULL && msg -> operation == LOAD){ //Load Miss 
+	if(block == NULL && msg -> operation == LOAD){ //Load Miss 
 		printf("Load miss!\n");
 		send_message(msg,msg->cycle+1,BUSRD,0,msg->addr,BROADCAST,cache->id,cache->pipe_to_bus); //Send the value to the bus to request for the value
 		/* Snoop */
 	}
-	else if(block -> status == NULL && msg -> operation == STORE){ //Write miss 
+	else if(block == NULL && msg -> operation == STORE){ //Write miss 
 		printf("Write miss!\n");
 		send_message(msg,msg->cycle+1,BUSRD,0,msg->addr,BROADCAST,cache->id,cache->pipe_to_bus); //Send the value to the bus
 		/* Snoop */
@@ -42,36 +42,36 @@ void handle_msg_fromCPU_MESI(struct cache_block* block, struct msg* msg,struct L
     	if(msg -> operation == LOAD){ //PrRd, Exclusive
     		//Nothing happens, cache hit
     		printf("cache hit!\n"); 
-    		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_proc); //Send the value to the proc
+    		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro); //Send the value to the proc
     	}
     	else if(msg -> operation == STORE){ //PrWr, Exclusive 
     		printf("cache hit!\n");
     		block -> status  =  MODIFY; //Status changes to modified
-    		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_proc); //Tell the proc that the modify was successful
+    		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro); //Tell the proc that the modify was successful
     	}
     }
     else if(block -> status  == MODIFY){ //
     	if(msg -> operation == LOAD){ //PrRd, Modified
     		//Nothing happens
     		printf("cache hit!\n");
-    		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_proc); //Send the value to the proc
+    		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro); //Send the value to the proc
     	}
     	else if(msg -> operation == STORE){ //PRWr, Modified
     		//Nothing happens 
     		printf("cache hit!\n");
-    		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_proc); //Send the value to the proc
+    		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro); //Send the value to the proc
     	}
     }
     else if(block -> status == SHARED){ 
     	if(msg -> operation ==  LOAD){ //PrRd, Shared
     		//Nothing happens
     		printf("cache hit!\n"); 
-    		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_proc); //Send the value to the proc
+    		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro); //Send the value to the proc
     	}
     	else if(msg -> operation == STORE){ //PrWr, Shared
     		printf("cache hit!\n");
     		block -> status = MODIFY; //State changes to modfied because this cache has the latest copy
-    		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_proc); //Send the value to the proc
+    		send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro); //Send the value to the proc
     	}	
     }
     else{
@@ -79,7 +79,7 @@ void handle_msg_fromCPU_MESI(struct cache_block* block, struct msg* msg,struct L
     }
 }
 
-void handle_msg_fromBUS_MESI(struct cache_block* block, struct msg* msg,struct L1_cache *cache,long int cycle){
+void handle_msg_fromBUS_MESI(struct cache_block* block, struct msg* msg,struct L1_cache *cache,long int cycle, struct directory *dir){
 	if(block == NULL){
 		printf("cache block is empty!\n");
 	}
@@ -97,7 +97,7 @@ void handle_msg_fromBUS_MESI(struct cache_block* block, struct msg* msg,struct L
 		}
 		else if(msg -> operation == BUSRDX){
 			block -> status = INVALID; //Status changes to invalid because there is another processor that wants to write to this cache block
-			send_message(msg,msg->cycle+1,FLUSH,block,msg->addr,BROADCAST,cache->id,cache->pipe_to_bus); //Sends flush to the bus
+			send_message(msg,msg->cycle+1,FLUSH,block->shared_line,msg->addr,BROADCAST,cache->id,cache->pipe_to_bus); //Sends flush to the bus
 		}
 	}
 	else if(block -> status == SHARED){

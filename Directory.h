@@ -9,9 +9,9 @@ struct directory{
 	struct L1_cache *cache1;
 	struct L1_cache *cache2;
 	struct L1_cache *cache3;
-}
+};
 
-struct directory* directory_init(struct L1_cache C0, struct L1_cache C1, struct L1_cache C2, struct L1_cache C3){
+struct directory* directory_init(struct L1_cache *C0, struct L1_cache *C1, struct L1_cache *C2, struct L1_cache *C3){
 	struct directory *dir = malloc(sizeof(struct directory));
 	dir -> cache0 = C0;
 	dir -> cache0 = C1;
@@ -38,4 +38,5 @@ int check_cache_block_in_all(struct directory *dir,struct cache_block *block){ /
 	return 0; //Not found 
 }
 
+#endif // DIRECTORY
 

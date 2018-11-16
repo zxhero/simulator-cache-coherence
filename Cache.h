@@ -84,6 +84,8 @@ struct L1_cache* cache_init(int cache_size, int associativity, int block_size, c
     local_cache->block_size = block_size;
     if(protocol[0] == 'M')  local_cache->protocol = MESI;
     else    local_cache->protocol = DRAGON;
+
+    return local_cache;
 };
 
 struct cache_block* lookup_cache(struct L1_cache *cache, unsigned int addr){

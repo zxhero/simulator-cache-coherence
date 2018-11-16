@@ -20,7 +20,6 @@ int main(int argc, char *argv[]){
     cache2 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol,CACHE2_ID);
     cache3 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol,CACHE3_ID);
     dir = directory_init(cache0, cache1, cache2, cache3); 
-    directory
     struct processor* pro0 = processor_init(input_file,0,cache0);
     //pro0->local_cache = cache0;
     struct processor* pro1 = processor_init(input_file,1,cache1);
