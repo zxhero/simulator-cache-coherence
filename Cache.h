@@ -127,20 +127,19 @@ void show_cache(struct L1_cache *cache){
 #include"Dragon.h"
 #include"MESI.h"
 
-void cache_run(struct L1_cache *cache, long int cycle){
+void cache_run(struct L1_cache *cache, long int cycle, struct directory *dir){
     //printf("cache %d run...\n",cache->id);
     struct msg* pro_msg = peek_at_msg(cache->pipe_from_pro);
     struct msg* bus_msg = peek_at_msg(cache->pipe_from_bus);
     struct cache_block *block = NULL;
     if(bus_msg != NULL && bus_msg->cycle <= cycle){
-        
         printf("cycle %ld, cache %d read from bus, src: %d. ",cycle, cache->id,bus_msg->src);
         bus_msg = read_pipe(cache->pipe_from_bus);
         block = lookup_cache(cache,bus_msg->addr);
             if(cache->protocol == DRAGON){
                 handle_msg_fromBUS_dragon(block,bus_msg,cache,cycle);
             }else{
-                handle_msg_fromBUS_MESI(block,bus_msg,cache,cycle);
+                handle_msg_fromBUS_MESI(block,bus_msg,cache,cycle,dir);
             }
     }    
     else if(pro_msg != NULL && pro_msg->cycle <= cycle){
@@ -150,7 +149,7 @@ void cache_run(struct L1_cache *cache, long int cycle){
             if(cache->protocol == DRAGON){
                 handle_msg_fromCPU_dragon(block,pro_msg,cache);
             }else{
-                handle_msg_fromCPU_MESI(block,pro_msg,cache);
+                handle_msg_fromCPU_MESI(block,pro_msg,cache,dir);
             }
     }
     return;

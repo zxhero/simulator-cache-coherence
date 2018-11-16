@@ -125,49 +125,49 @@ void bus_run(struct bus *bus, long int cycle){
     from_mem = peek_at_msg(bus->pipe_from_mem);
 
     if(from_C0 != NULL && from_C0->cycle <= cycle && from_C0->operation == FLUSH){
-        printf("cycle %ld,bus recieves mes flush from CACHE1, dest is %x\n",cycle,from_C0->dest);
+        printf("cycle %ld,bus receives mes flush from CACHE1, dest is %x\n",cycle,from_C0->dest);
         message = read_pipe(bus->pipe_from_C0);
         message->cycle = cycle+1;
         forward_msg(bus, message);
     }
     else if(from_C1 != NULL && from_C1->cycle <= cycle && from_C1->operation == FLUSH){
-        printf("cycle %ld,bus recieves mes flush from CACHE2, dest is %x\n",cycle,from_C1->dest);
+        printf("cycle %ld,bus receives mes flush from CACHE2, dest is %x\n",cycle,from_C1->dest);
         message = read_pipe(bus->pipe_from_C1);
         message->cycle = cycle+1;
         forward_msg(bus, message);
     }
     else if(from_C2 != NULL && from_C2->cycle <= cycle && from_C2->operation == FLUSH){
-        printf("cycle %ld,bus recieves mes flush from CACHE4, dest is %x\n",cycle,from_C2->dest);
+        printf("cycle %ld,bus receives mes flush from CACHE4, dest is %x\n",cycle,from_C2->dest);
         message = read_pipe(bus->pipe_from_C2);
         message->cycle = cycle+1;
         forward_msg(bus, message);
     }
     else if(from_C3 != NULL && from_C3->cycle <= cycle && from_C3->operation == FLUSH){
-        printf("cycle %ld,bus recieves mes flush from CACHE8, dest is %x\n",cycle,from_C3->dest);
+        printf("cycle %ld,bus receives mes flush from CACHE8, dest is %x\n",cycle,from_C3->dest);
         message = read_pipe(bus->pipe_from_C3);
         message->cycle = cycle+1;
         forward_msg(bus, message);
     }
     else if(from_C0 != NULL && from_C0->cycle <= cycle && from_C0->operation == BUSUPD){
-        printf("cycle %ld,bus recieves mes BUSUPD from CACHE1, dest is %x\n",cycle,from_C0->dest);
+        printf("cycle %ld,bus receives mes BUSUPD from CACHE1, dest is %x\n",cycle,from_C0->dest);
         message = read_pipe(bus->pipe_from_C0);
         message->cycle = cycle+1;
         forward_msg(bus, message);
     }
     else if(from_C1 != NULL && from_C1->cycle <= cycle && from_C1->operation == BUSUPD){
-        printf("cycle %ld,bus recieves mes BUSUPD from CACHE2, dest is %x\n",cycle,from_C1->dest);
+        printf("cycle %ld,bus receives mes BUSUPD from CACHE2, dest is %x\n",cycle,from_C1->dest);
         message = read_pipe(bus->pipe_from_C1);
         message->cycle = cycle+1;
         forward_msg(bus, message);
     }
     else if(from_C2 != NULL && from_C2->cycle <= cycle && from_C2->operation == BUSUPD){
-        printf("cycle %ld,bus recieves mes BUSUPD from CACHE4, dest is %x\n",cycle,from_C2->dest);
+        printf("cycle %ld,bus receives mes BUSUPD from CACHE4, dest is %x\n",cycle,from_C2->dest);
         message = read_pipe(bus->pipe_from_C2);
         message->cycle = cycle+1;
         forward_msg(bus, message);
     }
     else if(from_C3 != NULL && from_C3->cycle <= cycle && from_C3->operation == BUSUPD){
-        printf("cycle %ld,bus recieves mes BUSUPD from CACHE8, dest is %x\n",cycle,from_C3->dest);
+        printf("cycle %ld,bus receives mes BUSUPD from CACHE8, dest is %x\n",cycle,from_C3->dest);
         message = read_pipe(bus->pipe_from_C3);
         message->cycle = cycle+1;
         forward_msg(bus, message);
@@ -203,7 +203,6 @@ void bus_run(struct bus *bus, long int cycle){
         message->cycle = cycle+1;
         forward_msg(bus, message);
     }
-    
 };
 
 #endif // BUS

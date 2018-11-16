@@ -14,10 +14,12 @@ int main(int argc, char *argv[]){
     }
     //initialize
     struct L1_cache *cache0, *cache1, *cache2, *cache3;
+    struct directory *dir;
     cache0 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol,CACHE0_ID);
     cache1 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol,CACHE1_ID);
     cache2 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol,CACHE2_ID);
     cache3 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol,CACHE3_ID);
+    dir = directory_init(cache0, cache1, cache2, cache3); 
     struct processor* pro0 = processor_init(input_file,0,cache0);
     //pro0->local_cache = cache0;
     struct processor* pro1 = processor_init(input_file,1,cache1);
@@ -33,13 +35,13 @@ int main(int argc, char *argv[]){
     //run the simulator
     while(pro0->state != 4 || pro1->state != 4||pro2->state != 4 ||pro3->state != 4){
         processor_run(cycle,pro0);
-        cache_run(cache0,cycle);
+        cache_run(cache0,cycle, dir);
         processor_run(cycle,pro1);
-        cache_run(cache1,cycle);
+        cache_run(cache1,cycle, dir);
         processor_run(cycle,pro2);
-        cache_run(cache2,cycle);
+        cache_run(cache2,cycle, dir);
         processor_run(cycle,pro3);
-        cache_run(cache3,cycle);
+        cache_run(cache3,cycle, dir);
         memory_run(mem,cycle);
         bus_run(bus,cycle);
         cycle++;

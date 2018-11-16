@@ -7,6 +7,8 @@
 #include"Bus.h"
 #include"Memory.h"
 #include"message.h"
+#include"Directory.h"
+
 
 int Finish;
 long int cycle;
