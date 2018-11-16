@@ -139,6 +139,10 @@ void memory_run(struct memory *mem, long int cycle){
                     }
                 }
             }else if((request->msg->operation & FLUSH) != 0){                                  //write mem
+                if(entry == NULL){
+                    printf("can not find %x!\n",request->msg->addr);
+                    exit(1);
+                }
                 entry->state = BLOCK_WBACK;
                 entry->cycle = cycle + 100;
             }else{
