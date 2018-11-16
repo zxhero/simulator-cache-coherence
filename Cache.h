@@ -84,6 +84,8 @@ struct L1_cache* cache_init(int cache_size, int associativity, int block_size, c
     local_cache->block_size = block_size;
     if(protocol[0] == 'M')  local_cache->protocol = MESI;
     else    local_cache->protocol = DRAGON;
+
+    return local_cache;
 };
 
 struct cache_block* lookup_cache(struct L1_cache *cache, unsigned int addr){
@@ -130,16 +132,8 @@ void cache_run(struct L1_cache *cache, long int cycle){
     struct msg* pro_msg = peek_at_msg(cache->pipe_from_pro);
     struct msg* bus_msg = peek_at_msg(cache->pipe_from_bus);
     struct cache_block *block = NULL;
-    if(pro_msg != NULL && pro_msg->cycle == cycle){
-        printf("cycle %ld,cache %d read from pro. ",cycle, cache->id);
-        pro_msg = read_pipe(cache->pipe_from_pro);
-        block = lookup_cache(cache,pro_msg->addr);
-            if(cache->protocol == DRAGON){
-                handle_msg_fromCPU_dragon(block,pro_msg,cache);
-            }else{
-                handle_msg_fromCPU_MESI(block,pro_msg,cache);
-            }
-    }else if(bus_msg != NULL && bus_msg->cycle <= cycle){
+    if(bus_msg != NULL && bus_msg->cycle <= cycle){
+        
         printf("cycle %ld, cache %d read from bus, src: %d. ",cycle, cache->id,bus_msg->src);
         bus_msg = read_pipe(cache->pipe_from_bus);
         block = lookup_cache(cache,bus_msg->addr);
@@ -147,6 +141,16 @@ void cache_run(struct L1_cache *cache, long int cycle){
                 handle_msg_fromBUS_dragon(block,bus_msg,cache,cycle);
             }else{
                 handle_msg_fromBUS_MESI(block,bus_msg,cache,cycle);
+            }
+    }    
+    else if(pro_msg != NULL && pro_msg->cycle <= cycle){
+        printf("cycle %ld,cache %d read from pro. ",cycle, cache->id);
+        pro_msg = read_pipe(cache->pipe_from_pro);
+        block = lookup_cache(cache,pro_msg->addr);
+            if(cache->protocol == DRAGON){
+                handle_msg_fromCPU_dragon(block,pro_msg,cache);
+            }else{
+                handle_msg_fromCPU_MESI(block,pro_msg,cache);
             }
     }
     return;
