@@ -115,7 +115,7 @@ void bus_run(struct bus *bus, long int cycle){
     struct msg *from_C3 ;//= malloc(sizeof(struct msg)); //Message from C3
     struct msg *from_mem ;//= malloc(sizeof(struct msg)); //Message from mem
 
-    struct msg *message ;//= malloc(sizeof(struct msg));
+    struct msg *message;//= malloc(sizeof(struct msg));
 
     /* Reading in all the messages from the pipe*/ 
     from_C0 = peek_at_msg(bus->pipe_from_C0);
@@ -123,86 +123,47 @@ void bus_run(struct bus *bus, long int cycle){
     from_C2 = peek_at_msg(bus->pipe_from_C2);
     from_C3 = peek_at_msg(bus->pipe_from_C3);
     from_mem = peek_at_msg(bus->pipe_from_mem);
-
-    if(from_C0 != NULL && from_C0->cycle <= cycle && from_C0->operation == FLUSH){
-        printf("cycle %ld,bus receives mes flush from CACHE1, dest is %x\n",cycle,from_C0->dest);
-        message = read_pipe(bus->pipe_from_C0);
-        message->cycle = cycle+1;
-        forward_msg(bus, message);
+    
+    struct pipe *select_pipe = NULL;
+    struct msg *select_msg = NULL;
+    if(from_mem != NULL && from_mem->cycle <= cycle){
+        select_pipe = bus->pipe_from_mem;
+        select_msg = from_mem;
+    }else if(from_C3 != NULL && from_C3->cycle <= cycle){
+        select_pipe = bus->pipe_from_C3;
+        select_msg = from_C3;
+    }else if(from_C2 != NULL && from_C2->cycle <= cycle){
+        select_pipe = bus->pipe_from_C2;
+        select_msg = from_C2;
+    }else if(from_C1 != NULL && from_C1->cycle <= cycle){
+        select_pipe = bus->pipe_from_C1;
+        select_msg = from_C1;
+    }else if(from_C0 != NULL && from_C0->cycle <= cycle){
+        select_pipe = bus->pipe_from_C0;
+        select_msg = from_C0;
     }
-    else if(from_C1 != NULL && from_C1->cycle <= cycle && from_C1->operation == FLUSH){
-        printf("cycle %ld,bus receives mes flush from CACHE2, dest is %x\n",cycle,from_C1->dest);
-        message = read_pipe(bus->pipe_from_C1);
-        message->cycle = cycle+1;
-        forward_msg(bus, message);
+    if(select_msg == NULL)  return;
+    if(from_C3 != NULL && (from_C3->cycle < select_msg->cycle || (from_C3->cycle == select_msg->cycle && select_msg->operation != FLUSH && (from_C3->operation == FLUSH
+        || (from_C3->operation == BUSUPD && select_msg->operation != BUSUPD))))){
+        select_pipe = bus->pipe_from_C3;
+        select_msg = from_C3;        
+    }else if(from_C2 != NULL && (from_C2->cycle < select_msg->cycle || (from_C2->cycle == select_msg->cycle && select_msg->operation != FLUSH && (from_C2->operation == FLUSH
+        || (from_C2->operation == BUSUPD && select_msg->operation != BUSUPD))))){
+        select_pipe = bus->pipe_from_C2;
+        select_msg = from_C2;
+    }else if(from_C1 != NULL && (from_C1->cycle < select_msg->cycle || (from_C1->cycle == select_msg->cycle && select_msg->operation != FLUSH && (from_C1->operation == FLUSH
+        || (from_C1->operation == BUSUPD && select_msg->operation != BUSUPD))))){
+        select_pipe = bus->pipe_from_C1;
+        select_msg = from_C1;
+    }else if(from_C0 != NULL && (from_C0->cycle < select_msg->cycle || (from_C0->cycle == select_msg->cycle && select_msg->operation != FLUSH && (from_C0->operation == FLUSH
+        || (from_C0->operation == BUSUPD && select_msg->operation != BUSUPD))))){
+        select_pipe = bus->pipe_from_C0;
+        select_msg = from_C0;
     }
-    else if(from_C2 != NULL && from_C2->cycle <= cycle && from_C2->operation == FLUSH){
-        printf("cycle %ld,bus receives mes flush from CACHE4, dest is %x\n",cycle,from_C2->dest);
-        message = read_pipe(bus->pipe_from_C2);
-        message->cycle = cycle+1;
-        forward_msg(bus, message);
-    }
-    else if(from_C3 != NULL && from_C3->cycle <= cycle && from_C3->operation == FLUSH){
-        printf("cycle %ld,bus receives mes flush from CACHE8, dest is %x\n",cycle,from_C3->dest);
-        message = read_pipe(bus->pipe_from_C3);
-        message->cycle = cycle+1;
-        forward_msg(bus, message);
-    }
-    else if(from_C0 != NULL && from_C0->cycle <= cycle && from_C0->operation == BUSUPD){
-        printf("cycle %ld,bus receives mes BUSUPD from CACHE1, dest is %x\n",cycle,from_C0->dest);
-        message = read_pipe(bus->pipe_from_C0);
-        message->cycle = cycle+1;
-        forward_msg(bus, message);
-    }
-    else if(from_C1 != NULL && from_C1->cycle <= cycle && from_C1->operation == BUSUPD){
-        printf("cycle %ld,bus receives mes BUSUPD from CACHE2, dest is %x\n",cycle,from_C1->dest);
-        message = read_pipe(bus->pipe_from_C1);
-        message->cycle = cycle+1;
-        forward_msg(bus, message);
-    }
-    else if(from_C2 != NULL && from_C2->cycle <= cycle && from_C2->operation == BUSUPD){
-        printf("cycle %ld,bus receives mes BUSUPD from CACHE4, dest is %x\n",cycle,from_C2->dest);
-        message = read_pipe(bus->pipe_from_C2);
-        message->cycle = cycle+1;
-        forward_msg(bus, message);
-    }
-    else if(from_C3 != NULL && from_C3->cycle <= cycle && from_C3->operation == BUSUPD){
-        printf("cycle %ld,bus receives mes BUSUPD from CACHE8, dest is %x\n",cycle,from_C3->dest);
-        message = read_pipe(bus->pipe_from_C3);
-        message->cycle = cycle+1;
-        forward_msg(bus, message);
-    }
-    else if(from_mem != NULL && from_mem->cycle <= cycle){
-        printf("cycle %ld,bus recieves mes from mem, dest is %x\n",cycle,from_mem->dest);
-        message = read_pipe(bus->pipe_from_mem);
-        message->cycle = cycle+1;
-        forward_msg(bus, message);
-    }
-    else if(from_C0 != NULL && from_C0->cycle <= cycle){ //All bus operations have the same priority
-        printf("cycle %ld,bus recieves mes %x from CACHE1, dest is %x\n",cycle,from_C0->operation,from_C0->dest);
-        message = read_pipe(bus->pipe_from_C0);
-        message->cycle = cycle+1;
-    //if(from_mem != NULL) printf("%ld\n",from_mem->cycle);
-        forward_msg(bus, message);
-    }
-    else if(from_C1 != NULL && from_C1->cycle <= cycle){
-        printf("cycle %ld,bus recieves mes %x from CACHE2, dest is %x\n",cycle,from_C1->operation,from_C1->dest);
-        message = read_pipe(bus->pipe_from_C1);
-        message->cycle = cycle+1;
-        forward_msg(bus, message);
-    }
-    else if(from_C2 != NULL && from_C2->cycle <= cycle){
-        printf("cycle %ld,bus recieves mes %x from CACHE4, dest is %x\n",cycle,from_C2->operation,from_C2->dest);
-        message = read_pipe(bus->pipe_from_C2);
-        message->cycle = cycle+1;
-        forward_msg(bus, message);
-    }
-    else if(from_C3 != NULL && from_C3->cycle <= cycle){
-        printf("cycle %ld,bus recieves mes %x from CACHE8, dest is %x\n",cycle,from_C3->operation,from_C3->dest);
-        message = read_pipe(bus->pipe_from_C3);
-        message->cycle = cycle+1;
-        forward_msg(bus, message);
-    }
+    printf("cycle %ld,bus receives mes %d from %d, dest is %x\n",cycle,select_msg->operation,select_msg->src,select_msg->dest);
+    message = read_pipe(select_pipe);
+    message->cycle = cycle+1;
+    forward_msg(bus, message);
 };
 
 #endif // BUS
