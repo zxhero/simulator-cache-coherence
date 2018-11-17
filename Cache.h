@@ -52,6 +52,9 @@ struct L1_cache{
     char id;
     /*In dragon protocol, cache may stall for store or read miss*/
     char status;
+    long int miss_time;         //cache miss time
+    long int access_pdata;      //accesses to private data
+    long int access_sdata;      //accesses to shared data
 };
 
 struct L1_cache* cache_init(int cache_size, int associativity, int block_size, char* protocol, char id){
@@ -82,9 +85,11 @@ struct L1_cache* cache_init(int cache_size, int associativity, int block_size, c
     mask = ~mask;
     local_cache->set_index_mask = (mask)*block_size;
     local_cache->block_size = block_size;
-    if(protocol[0] == 'M')  local_cache->protocol = MESI;
+    if(protocol[0] == 'M' || protocol[0] == 'm')  local_cache->protocol = MESI;
     else    local_cache->protocol = DRAGON;
-
+    local_cache->miss_time = 0;
+    local_cache->access_pdata = 0;
+    local_cache->access_sdata = 0;
     return local_cache;
 };
 
@@ -141,11 +146,12 @@ void cache_run(struct L1_cache *cache, long int cycle, struct directory *dir){
             }else{
                 handle_msg_fromBUS_MESI(block,bus_msg,cache,cycle,dir);
             }
-    }    
+    }
     else if(pro_msg != NULL && pro_msg->cycle <= cycle){
         printf("cycle %ld,cache %d read from pro. ",cycle, cache->id);
         pro_msg = read_pipe(cache->pipe_from_pro);
         block = lookup_cache(cache,pro_msg->addr);
+        if(block == NULL)   cache->miss_time ++;
             if(cache->protocol == DRAGON){
                 handle_msg_fromCPU_dragon(block,pro_msg,cache);
             }else{

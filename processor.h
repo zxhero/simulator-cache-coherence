@@ -17,6 +17,10 @@ struct processor{
     struct L1_cache *local_cache;
     struct pipe *pipe_to_cache;
     struct pipe *pipe_from_cache;
+    long int excution_cycle;
+    long int compute_cycle;
+    long int num_of_LS;
+    long int idle_cycle;
 };
 
 struct processor* processor_init(char *input_file, int pro_id,struct L1_cache *local_cache){
@@ -34,6 +38,10 @@ struct processor* processor_init(char *input_file, int pro_id,struct L1_cache *l
 	proc->pro_id = pro_id;
 	proc->cycle = 0; //clock
 	proc->state = 0; //Assume the processor is free
+	proc->compute_cycle = 0;
+	proc->excution_cycle = 0;
+	proc->idle_cycle = 0;
+	proc->num_of_LS = 0;
 	return proc;
 };
 
@@ -46,6 +54,8 @@ void processor_run(long int cycle, struct processor *proc){
         printf("cycle %ld, processor %d get 0x%x\n",cycle,1<<proc->pro_id,rply->addr);
 		proc->state = 0; //Make the processor free again
         free(rply);
+        proc->excution_cycle ++;
+        proc->idle_cycle ++;
 		return;
 	}
 	else if(proc->state == 2 && proc->cycle == cycle){ //Check if the processor is stalling for computation
@@ -54,7 +64,7 @@ void processor_run(long int cycle, struct processor *proc){
 	}
 	else if(proc->state == 0){ //Processor is free & check for labels and the addr
 		//proc->cycle++; //Increase the proc cycle
-
+        proc->excution_cycle++;
 		if(fscanf(proc->benchmark, "%d %x", &label, &addr) == EOF){
             proc->state = 4;
             printf("cycle %ld, processor %d end...\n",cycle,1<<proc->pro_id);
@@ -71,6 +81,7 @@ void processor_run(long int cycle, struct processor *proc){
 			message->operation = LOAD;
 			message->cycle = cycle+1;
 			message->addr = addr;
+			proc->num_of_LS ++;
 			write_pipe(proc->pipe_to_cache, message); //Passes the messsage to the pipe to be sent to the cache
 		}
 		else if(label == 1){ //Store instruction
@@ -79,11 +90,14 @@ void processor_run(long int cycle, struct processor *proc){
 			message->operation = STORE;
 			message->cycle = cycle+1;
 			message->addr = addr;
+			proc->num_of_LS ++;
 			write_pipe(proc->pipe_to_cache, message); //Passes the messsage to the pipe to be sent to the cache
 		}
 		else if(label == 2) { //Computation instruction
             proc->state = 2;
 			proc->cycle = cycle + addr;
+			proc->compute_cycle += addr;
+			proc->excution_cycle+= addr;
 			return;
 		}
 		else{
@@ -94,7 +108,10 @@ void processor_run(long int cycle, struct processor *proc){
 	}else if(proc->state == 1 && (proc->cycle + 500) == cycle){
         printf("something wrong with processor %d \n",1<<proc->pro_id);
         exit(1);
-    }
+    }else if(proc->state == 1){
+        proc->idle_cycle++;
+        proc->excution_cycle++;
+	}
 };
 #endif // PROCESSOR
 

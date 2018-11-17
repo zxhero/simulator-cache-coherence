@@ -16,6 +16,9 @@ struct bus{
     struct pipe *pipe_from_C3;
     struct pipe *pipe_to_mem;
     struct pipe *pipe_from_mem;
+    long int traffic_bytes;
+    long int num_of_busupd;
+    long int num_of_invalid;
 };
 
 struct bus* bus_init(struct L1_cache *C0, struct L1_cache *C1, struct L1_cache *C2, struct L1_cache *C3, struct memory *mem){
@@ -31,12 +34,15 @@ struct bus* bus_init(struct L1_cache *C0, struct L1_cache *C1, struct L1_cache *
     bus->pipe_to_C3 = C3->pipe_from_bus;
     bus->pipe_from_mem = mem->pipe_to_bus;
     bus->pipe_to_mem = mem->pipe_from_bus;
+    bus->num_of_busupd = 0;
+    bus->num_of_invalid = 0;
+    bus->traffic_bytes = 0;
     return bus;
 }
 
 void forward_msg(struct bus *bus, struct msg *message){
-    
-        
+
+
     if((message->dest & BROADCAST) != 0){
         struct msg *msg1 = malloc(sizeof(struct msg));
         memcpy(msg1,message,sizeof(struct msg));
@@ -67,7 +73,7 @@ void forward_msg(struct bus *bus, struct msg *message){
             write_pipe(bus->pipe_to_C2,msg3);
             write_pipe(bus->pipe_to_mem,msg4);
         }
-        
+
         //return;
     }
 
@@ -102,9 +108,9 @@ void forward_msg(struct bus *bus, struct msg *message){
 
 }
 /*
-- Takes the message (from processor and memeory)and sends it to the pipe of the destination. 
-- Processor has more priority than memory. 
-- Each cycle the bus only processes 1 message. Can use read_pipe and write_pipe if needed.  
+- Takes the message (from processor and memeory)and sends it to the pipe of the destination.
+- Processor has more priority than memory.
+- Each cycle the bus only processes 1 message. Can use read_pipe and write_pipe if needed.
 */
 
 void bus_run(struct bus *bus, long int cycle){
@@ -117,13 +123,13 @@ void bus_run(struct bus *bus, long int cycle){
 
     struct msg *message;//= malloc(sizeof(struct msg));
 
-    /* Reading in all the messages from the pipe*/ 
+    /* Reading in all the messages from the pipe*/
     from_C0 = peek_at_msg(bus->pipe_from_C0);
     from_C1 = peek_at_msg(bus->pipe_from_C1);
     from_C2 = peek_at_msg(bus->pipe_from_C2);
     from_C3 = peek_at_msg(bus->pipe_from_C3);
     from_mem = peek_at_msg(bus->pipe_from_mem);
-    
+
     struct pipe *select_pipe = NULL;
     struct msg *select_msg = NULL;
     if(from_mem != NULL && from_mem->cycle <= cycle){
@@ -146,7 +152,7 @@ void bus_run(struct bus *bus, long int cycle){
     if(from_C3 != NULL && (from_C3->cycle < select_msg->cycle || (from_C3->cycle == select_msg->cycle && select_msg->operation != FLUSH && (from_C3->operation == FLUSH
         || (from_C3->operation == BUSUPD && select_msg->operation != BUSUPD))))){
         select_pipe = bus->pipe_from_C3;
-        select_msg = from_C3;        
+        select_msg = from_C3;
     }else if(from_C2 != NULL && (from_C2->cycle < select_msg->cycle || (from_C2->cycle == select_msg->cycle && select_msg->operation != FLUSH && (from_C2->operation == FLUSH
         || (from_C2->operation == BUSUPD && select_msg->operation != BUSUPD))))){
         select_pipe = bus->pipe_from_C2;
@@ -163,6 +169,12 @@ void bus_run(struct bus *bus, long int cycle){
     printf("cycle %ld,bus receives mes %d from %d, dest is %x\n",cycle,select_msg->operation,select_msg->src,select_msg->dest);
     message = read_pipe(select_pipe);
     message->cycle = cycle+1;
+    if((message->operation & (REPLY | FLUSH | BUSUPD)) != 0 ){
+        bus->traffic_bytes ++;
+    }
+    if((message->operation & BUSUPD) != 0){
+        bus->num_of_busupd ++;
+    }
     forward_msg(bus, message);
 };
 

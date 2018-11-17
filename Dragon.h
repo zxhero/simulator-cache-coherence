@@ -12,6 +12,11 @@ void handle_msg_fromCPU_dragon(struct cache_block* block, struct msg* msg, struc
         }else{                                      //load hit, send back data to Pro
             printf("Load hit! \n");
             send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro);
+            if(block->status == MODIFY || block->status == EXCLUSIVE){
+                cache->access_pdata ++;
+            }else{
+                cache->access_sdata ++;
+            }
         }
     }else if(msg->operation == STORE){                                 //store
         //printf("STORE!\n");
@@ -25,22 +30,30 @@ void handle_msg_fromCPU_dragon(struct cache_block* block, struct msg* msg, struc
             if(block->status == EXCLUSIVE){         //change cache block status to M, change shared line
                 block->status = MODIFY;
                 block->shared_line = ((block->shared_line & 0xf) | (cache->id << 4));
+                cache->access_pdata++;
             }else if(block->status == SHARED_CLEAN){    //change cache block status to SM or M, send busupd, change shared line
                 block->shared_line = ((block->shared_line & 0xf) | (cache->id << 4));
                 if(shared != 0){
                     block->status = SHARED_MODIFY;
                     struct msg* busupd_msg = calloc(1,sizeof(struct msg));
                     send_message(busupd_msg,msg->cycle+1,BUSUPD,block->shared_line,msg->addr,shared,cache->id,cache->pipe_to_bus);
+                    cache->access_sdata++;
                 }else{
                     block->status = MODIFY;
+                    cache->access_pdata++;
                 }
+
             }else if(block->status == SHARED_MODIFY){   //send busupd, maybe change cache block status to M
                 if(shared != 0){
                     struct msg* busupd_msg = calloc(1,sizeof(struct msg));
                     send_message(busupd_msg,msg->cycle+1,BUSUPD,block->shared_line,msg->addr,shared,cache->id,cache->pipe_to_bus);
+                    cache->access_sdata++;
                 }else{
                     block->status = MODIFY;
+                    cache->access_pdata++;
                 }
+            }else{
+                cache->access_pdata++;
             }
             send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro);
         }
@@ -93,8 +106,10 @@ void handle_msg_fromBUS_dragon(struct cache_block* block, struct msg* msg, struc
                 new_block->shared_line = (msg->shared_line & 0xf) | (cache->id<<4);
                 if(shared == 0){
                     new_block->status = MODIFY;
+                    cache->access_pdata++;
                 }else{
                     new_block->status = SHARED_MODIFY;
+                    cache->access_sdata++;
                     struct msg* busupd_msg = calloc(1,sizeof(struct msg));
                     send_message(busupd_msg,cycle+1,BUSUPD,new_block->shared_line,msg->addr,shared,cache->id,cache->pipe_to_bus);
                 }
@@ -105,8 +120,10 @@ void handle_msg_fromBUS_dragon(struct cache_block* block, struct msg* msg, struc
                 new_block->addr = (msg->addr ) / cache->block_size;
                 if(shared == 0){
                     new_block->status = EXCLUSIVE;
+                    cache->access_pdata++;
                 }else{
                     new_block->status = SHARED_CLEAN;
+                    cache->access_sdata++;
                 }
             }else{
                 printf("wrong cache status\n");
@@ -253,14 +270,14 @@ void handle_msg_fromBUS_dragon(struct cache_block* block, struct msg* msg, struc
             int find = 0;
             list_for_each_entry_safe(send_msg,next_send_msg,&cache->pipe_to_bus->head.head,head){
                 if((send_msg->msg->addr/cache->block_size) == (msg->addr/cache->block_size)){
-                    find = 1;                    
-                    if((send_msg->msg->operation & FLUSH) != 0){                    
+                    find = 1;
+                    if((send_msg->msg->operation & FLUSH) != 0){
                         if(send_msg->msg->dest == msg->src){
                             if((send_msg->msg->shared_line & 0xf) != msg->src){
                                 free(send_msg->msg);
                                 list_delete_entry(&send_msg->head);
                                 free(send_msg);
-                            }                            
+                            }
                             else{
                                 send_msg->msg->dest = MEMORY_ID;
                             }

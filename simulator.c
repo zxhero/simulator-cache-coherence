@@ -19,7 +19,7 @@ int main(int argc, char *argv[]){
     cache1 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol,CACHE1_ID);
     cache2 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol,CACHE2_ID);
     cache3 = cache_init(atoi(cache_size),atoi(associativity),atoi(block_size),protocol,CACHE3_ID);
-    dir = directory_init(cache0, cache1, cache2, cache3); 
+    dir = directory_init(cache0, cache1, cache2, cache3);
     struct processor* pro0 = processor_init(input_file,0,cache0);
     //pro0->local_cache = cache0;
     struct processor* pro1 = processor_init(input_file,1,cache1);
@@ -47,7 +47,22 @@ int main(int argc, char *argv[]){
         cycle++;
     }
     //print results
-    printf("protocol   benchmark  cycles\n");
-    printf("%s  %s  %ld\n",protocol,input_file,cycle);
+    printf("protocol |  benchmark | total cycles  |  data traffic  |  invalidation  |  update\n");
+    printf("%s  %s  %ld  %ld  %ld  %ld\n",protocol,input_file,cycle,bus->traffic_bytes*(mem->block_size),
+           (cache0->protocol == MESI) ? 1:0,(cache0->protocol == DRAGON) ? bus->num_of_busupd:0);
+    printf("cache size |  block size |  associativity\n");
+    printf("%s  %s  %s\n",cache_size,block_size,associativity)
+    printf("core 1\n");
+    printf("compute cycle |  load/store  | idls cycle  |  miss rate  |  access to private data  |  access to shared data\n");
+    printf("%ld  %ld  %ld  %ld  %ld  %ld\n",pro0->compute_cycle,pro0->num_of_LS,pro0->idle_cycle,cache0->miss_time,cache0->access_pdata,cache0->access_sdata);
+    printf("core 2\n");
+    printf("compute cycle |  load/store  | idls cycle  |  miss rate  |  access to private data  |  access to shared data\n");
+    printf("%ld  %ld  %ld  %ld  %ld  %ld\n",pro1->compute_cycle,pro1->num_of_LS,pro1->idle_cycle,cache1->miss_time,cache1->access_pdata,cache1->access_sdata);
+    printf("core 3\n");
+    printf("compute cycle |  load/store  | idls cycle  |  miss rate  |  access to private data  |  access to shared data\n");
+    printf("%ld  %ld  %ld  %ld  %ld  %ld\n",pro2->compute_cycle,pro2->num_of_LS,pro2->idle_cycle,cache2->miss_time,cache2->access_pdata,cache2->access_sdata);
+    printf("core 4\n");
+    printf("compute cycle |  load/store  | idls cycle  |  miss rate  |  access to private data  |  access to shared data\n");
+    printf("%ld  %ld  %ld  %ld  %ld  %ld\n",pro3->compute_cycle,pro3->num_of_LS,pro3->idle_cycle,cache3->miss_time,cache3->access_pdata,cache3->access_sdata);
     return 0;
 }
