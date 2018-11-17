@@ -135,7 +135,8 @@ void memory_run(struct memory *mem, long int cycle){
                         memset(reply,0,sizeof(struct msg));
                         send_message(reply,time,request->msg->operation | REPLY,request->msg->src | shared,request->msg->addr,request->msg->src,MEMORY_ID,mem->pipe_to_bus);
                     }else{
-                        printf("cycle %ld, request for %x from cache%d is in cache.\n",cycle,request->msg->addr,request->msg->src);
+                        printf("cycle %ld, request for %x from cache%d is in cache. mem block %x maybe in cache %d\n",
+                                cycle,request->msg->addr,request->msg->src,entry->addr*mem->block_size,entry->cache_id);
                     }
                 }
             }else if((request->msg->operation & FLUSH) != 0){                                  //write mem
