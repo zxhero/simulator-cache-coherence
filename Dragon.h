@@ -257,9 +257,10 @@ void handle_msg_fromBUS_dragon(struct cache_block* block, struct msg* msg, struc
                     if((send_msg->msg->operation & FLUSH) != 0){                    
                         if(send_msg->msg->dest == msg->src){
                             if((send_msg->msg->shared_line & 0xf) != msg->src){
-                                free(send_msg->msg);
-                                list_delete_entry(&send_msg->head);
-                                free(send_msg);
+                                //struct msg *flush_msg = send_msg->msg;
+                                //list_delete_entry(&send_msg->head);
+                                //free(send_msg);
+                                //send_message(flush_msg,cycle+1,FLUSH,msg->shared_line,msg->addr,,cache->id,cache->pipe_to_bus);
                             }                            
                             else{
                                 send_msg->msg->dest = MEMORY_ID;
@@ -273,10 +274,10 @@ void handle_msg_fromBUS_dragon(struct cache_block* block, struct msg* msg, struc
                     }
                 }
             }
-            if(msg->dest == cache->id && find == 0){
+            /*if(msg->dest == cache->id && find == 0){
                 struct msg *new_msg = malloc(sizeof(struct msg));
                 send_message(new_msg,cycle+1,FLUSH,0,msg->addr,MEMORY_ID,msg->src,cache->pipe_to_bus);
-            }
+            }*/
             free(msg);
         }else{
             if(block->status == SHARED_CLEAN){
