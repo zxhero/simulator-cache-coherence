@@ -175,6 +175,9 @@ void bus_run(struct bus *bus, long int cycle){
     if((message->operation & BUSUPD) != 0){
         bus->num_of_busupd ++;
     }
+    if(message->operation == INVALIDATION){
+        bus->num_of_invalid ++;
+    }
     forward_msg(bus, message);
 };
 
