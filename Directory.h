@@ -46,21 +46,21 @@ int check_cache_0(struct directory *dir, unsigned int addr){
 	return 0;
 };
 
-int check_cache_1(struct directory *dir, struct cache_block *block){
+int check_cache_1(struct directory *dir, unsigned int addr){
 	if(lookup_cache(dir->cache1, addr) != NULL){
 		return 1; //Means the block exists
 	}
 	return 0;
 };
 
-int check_cache_2(struct directory *dir, struct cache_block *block){
+int check_cache_2(struct directory *dir, unsigned int addr){
 	if(lookup_cache(dir->cache2, addr) != NULL){
 		return 1; //Means the block exists
 	}
 	return 0;
 };
 
-int check_cache_3(struct directory *dir, struct cache_block *block){
+int check_cache_3(struct directory *dir, unsigned int addr){
 	if(lookup_cache(dir->cache3, addr) != NULL){
 		return 1;
 	}
