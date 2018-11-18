@@ -7,6 +7,7 @@
 #define FLUSH   0x4
 #define BUSRD   0x8
 #define BUSRDX  0x10
+#define INVALIDATION    0x100
 //operation of CPU
 #define LOAD    0x20
 #define STORE   0x40
