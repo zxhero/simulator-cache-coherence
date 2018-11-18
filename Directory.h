@@ -21,46 +21,47 @@ struct directory* directory_init(struct L1_cache *C0, struct L1_cache *C1, struc
 	return dir;
 };
 
-int check_cache_block_in_all(struct directory *dir,struct cache_block *block){ //Returns 1 if the block exists somewhere else in the cache hierarchy else returns 0
-	if(lookup_cache(dir->cache0, block->addr) != NULL){
-		return 1; //Means the block exists 
+int check_cache_block_in_all(struct directory *dir,unsigned int addr){ //Returns 1 if the block exists somewhere else in the cache hierarchy else returns 0
+	unsigned int tag = 0;
+	if(lookup_cache(dir->cache0, addr) != NULL){
+		tag |= CACHE0_ID; //Means the block exists
 	}
-	else if( lookup_cache(dir->cache1, block->addr) != NULL ){
-		return 1;
+	if( lookup_cache(dir->cache1, addr) != NULL ){
+		tag |= CACHE1_ID;
 	}
-	else if( lookup_cache(dir->cache2, block->addr) != NULL ){
-		return 1;
+	if( lookup_cache(dir->cache2, addr) != NULL ){
+		tag |= CACHE2_ID;
 	}
-	else if( lookup_cache(dir->cache3, block->addr) != NULL ){
-		return 1;
-	}	
+	if( lookup_cache(dir->cache3, addr) != NULL ){
+		tag |= CACHE3_ID;
+	}
 
-	return 0; //Not found 
+	return tag; //Not found
 };
 
-int check_cache_0(struct directory *dir, struct cache_block *block){
-	if(lookup_cache(dir->cache0, block->addr) != NULL){
-		return 1; //Means the block exists 
+int check_cache_0(struct directory *dir, unsigned int addr){
+	if(lookup_cache(dir->cache0, addr) != NULL){
+		return 1; //Means the block exists
 	}
 	return 0;
 };
 
 int check_cache_1(struct directory *dir, struct cache_block *block){
-	if(lookup_cache(dir->cache1, block->addr) != NULL){
+	if(lookup_cache(dir->cache1, addr) != NULL){
 		return 1; //Means the block exists
 	}
 	return 0;
 };
 
 int check_cache_2(struct directory *dir, struct cache_block *block){
-	if(lookup_cache(dir->cache2, block->addr) != NULL){
+	if(lookup_cache(dir->cache2, addr) != NULL){
 		return 1; //Means the block exists
 	}
 	return 0;
 };
 
 int check_cache_3(struct directory *dir, struct cache_block *block){
-	if(lookup_cache(dir->cache3, block->addr) != NULL){
+	if(lookup_cache(dir->cache3, addr) != NULL){
 		return 1;
 	}
 	return 0;
