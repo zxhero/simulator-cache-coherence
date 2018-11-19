@@ -74,5 +74,12 @@ The memory has a linked list records which blocks are in caches. <br>
 ### list.h
 Providing some operations on linked list.
 ### Set up
-
+>   Make
 ### Command line options
+>  coherence “protocol” “input_file” “cache_size” “associativity” “block_size”
+
+*  “protocol” is either MESI or Dragon
+*  “input\_file" is the input benchmark name (e.g., bodytrack). Please put "trace_name"\_"number".data and code under same folder
+*  “cache\_size”: cache size in bytes
+*  “associativity”: associativity of the cache
+*  “block\_size”: block size in bytes
