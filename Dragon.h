@@ -6,11 +6,11 @@ void handle_msg_fromCPU_dragon(struct cache_block* block, struct msg* msg, struc
     if(msg->operation == LOAD){                     //load
         //printf("LOAD!\n");
         if(block == NULL){                          //load miss, change cache status to PrRdMiss, send busrd
-            printf("Load miss! \n");
+            //printf("Load miss! \n");
             cache->status = PRRDMISS;
             send_message(msg,msg->cycle+1,BUSRD,0,msg->addr,BROADCAST,cache->id,cache->pipe_to_bus);
         }else{                                      //load hit, send back data to Pro
-            printf("Load hit! \n");
+            //printf("Load hit! \n");
             send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro);
             if(block->status == MODIFY || block->status == EXCLUSIVE){
                 cache->access_pdata ++;
@@ -21,11 +21,11 @@ void handle_msg_fromCPU_dragon(struct cache_block* block, struct msg* msg, struc
     }else if(msg->operation == STORE){                                 //store
         //printf("STORE!\n");
         if(block == NULL){                          /*store miss, change cache status to PrWrMiss, send busrd */
-            printf("Store miss! \n");
+            //printf("Store miss! \n");
             cache->status = PRWRMISS;
             send_message(msg,msg->cycle+1,BUSRD,0,msg->addr,BROADCAST,cache->id,cache->pipe_to_bus);
         }else{                                      //store hit
-            printf("Store hit! status is %d \n",block->status);
+            //printf("Store hit! status is %d \n",block->status);
             int shared = ((block->shared_line & 0xf) - cache->id);
             if(block->status == EXCLUSIVE){         //change cache block status to M, change shared line
                 block->status = MODIFY;
@@ -58,7 +58,7 @@ void handle_msg_fromCPU_dragon(struct cache_block* block, struct msg* msg, struc
             send_message(msg,msg->cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,cache->id,cache->pipe_to_pro);
         }
     }else{
-        printf("Wrong message from Pro\n");
+        //printf("Wrong message from Pro\n");
     }
 };
 
@@ -69,7 +69,7 @@ void change_msg_buffer_shared(struct pipe *pipe, int shared, unsigned int addr, 
         //printf("change!%x %x\n",send_msg->msg->addr,addr);
         if((send_msg->msg->addr/block_size) == (addr)){
             send_msg->msg->shared_line = shared;
-            printf("Change msg to %d, shared line %x\n",send_msg->msg->dest,shared);
+            //printf("Change msg to %d, shared line %x\n",send_msg->msg->dest,shared);
         }
     }
 }
@@ -79,10 +79,10 @@ void handle_msg_fromBUS_dragon(struct cache_block* block, struct msg* msg, struc
     if((msg->operation & REPLY) != 0 && (msg->operation & BUSRD) != 0){         //reply for busrd
         if(block == NULL){
             struct cache_block *new_block = find_available_block(cache,msg->addr);
-            printf("msg is Reply");
+            //printf("msg is Reply");
             if(new_block->status != INVALID){           //evict old cache block
                 unsigned int evict_addr = new_block->addr * cache->block_size;
-                printf(", and we need to evict %x, status: %d", evict_addr, new_block->status);
+                //printf(", and we need to evict %x, status: %d", evict_addr, new_block->status);
                 //printf("malloc evict msg\n");
                 struct msg* evict_msg = malloc(sizeof(struct msg));//calloc(1,sizeof(struct msg));
                 //printf("malloc evict msg\n");
@@ -126,7 +126,7 @@ void handle_msg_fromBUS_dragon(struct cache_block* block, struct msg* msg, struc
                     cache->access_sdata++;
                 }
             }else{
-                printf("wrong cache status\n");
+                //printf("wrong cache status\n");
                 exit(1);
             }
             send_message(msg,cycle+1,SUCCEED,0,msg->addr,PROCESSOR_ID,0,cache->pipe_to_pro);
@@ -150,13 +150,13 @@ void handle_msg_fromBUS_dragon(struct cache_block* block, struct msg* msg, struc
                 }
                 change_msg_buffer_shared(cache->pipe_to_bus,block->shared_line,block->addr,cache->block_size);
             }else{
-                printf("something wrong!\n");
+                //printf("something wrong!\n");
                 exit(1);
             }
         }
-        printf("\n");
+        //printf("\n");
     }else if((msg->operation & BUSUPD) != 0){         //
-        printf("msg is BUSUPD\n");
+        //printf("msg is BUSUPD\n");
         if(block == NULL);
         else if(block->status == SHARED_CLEAN || block->status == EXCLUSIVE ||block->status == MODIFY){          //change shared line
             block->shared_line = owner + ((block->shared_line&0xf) | shared);
@@ -179,20 +179,20 @@ void handle_msg_fromBUS_dragon(struct cache_block* block, struct msg* msg, struc
         }
         free(msg);
     }else if((msg->operation & BUSRD) != 0){
-        printf("msg is BUSRD");
+        //printf("msg is BUSRD");
         if(block != NULL){
-            printf(", and this cache has it! ");
+            //printf(", and this cache has it! ");
             if(block->status == EXCLUSIVE){             //change cache block status to Sc, may send reply, change shared line
-                printf("reply.\n");
+                //printf("reply.\n");
                 block->status = SHARED_CLEAN;
                 block->shared_line |= msg->src;
                 send_message(msg,cycle+1,msg->operation | REPLY,block->shared_line,msg->addr,msg->src,cache->id,cache->pipe_to_bus);
             }else if(block->status == SHARED_CLEAN){    //may send reply, change shared line
                 shared = (block->shared_line & 0xf) - cache->id;
                 block->shared_line |= msg->src;
-                printf(" %x %x ",block->shared_line & 0xf0, block->shared_line & 0xf);
+                //printf(" %x %x ",block->shared_line & 0xf0, block->shared_line & 0xf);
                 if((block->shared_line & 0xf0) == 0 &&  shared< cache->id){  //the cache withe bigger id is responsible to reply
-                    printf("reply.\n");
+                    //printf("reply.\n");
                     send_message(msg,cycle+1,msg->operation | REPLY,block->shared_line,msg->addr,msg->src,cache->id,cache->pipe_to_bus);
                 }else{
                     struct element* send_msg = NULL;
@@ -204,19 +204,19 @@ void handle_msg_fromBUS_dragon(struct cache_block* block, struct msg* msg, struc
                         }
                     }
                     if(find == 1){
-                        printf("reply.\n");
+                        //printf("reply.\n");
                         send_message(msg,cycle+1,msg->operation | REPLY,block->shared_line,msg->addr,msg->src,cache->id,cache->pipe_to_bus);
                     }else{
-                        printf("\n");
+                        //printf("\n");
                         free(msg);
                     }
                 }
             }else if(block->status == SHARED_MODIFY){   //send reply, change shared line
-                printf("reply.\n");
+                //printf("reply.\n");
                 block->shared_line |= msg->src;
                 send_message(msg,cycle+1,msg->operation | REPLY,block->shared_line,msg->addr,msg->src,cache->id,cache->pipe_to_bus);
             }else if(block->status == MODIFY){          //change cache block status to Sm, send reply, change shared line
-                printf("reply.\n");
+                //printf("reply.\n");
                 block->status = SHARED_MODIFY;
                 block->shared_line |= msg->src;
                 send_message(msg,cycle+1,msg->operation | REPLY,block->shared_line,msg->addr,msg->src,cache->id,cache->pipe_to_bus);
@@ -235,7 +235,7 @@ void handle_msg_fromBUS_dragon(struct cache_block* block, struct msg* msg, struc
                     }
                 }
                 if(find_reply == 1){
-                    printf("reply.\n");
+                    //printf("reply.\n");
                     send_msg->msg->shared_line |= msg->src;
                     send_msg->msg->dest |= msg->src;
                     change_msg_buffer_shared(cache->pipe_to_bus,send_msg->msg->shared_line,send_msg->msg->addr/cache->block_size,cache->block_size);
@@ -243,12 +243,12 @@ void handle_msg_fromBUS_dragon(struct cache_block* block, struct msg* msg, struc
                     list_for_each_entry_safe(send_msg,next_send_msg,&cache->pipe_to_bus->head.head,head){
                         if((send_msg->msg->addr/cache->block_size) == (msg->addr/cache->block_size) ){
                             if(send_msg->msg->dest == MEMORY_ID && send_msg->msg->operation == FLUSH){
-                                printf("reply.");
+                                //printf("reply.");
                                 list_delete_entry(&send_msg->head);
                                 send_message(send_msg->msg,cycle+1,BUSRD|REPLY,msg->src,msg->addr,msg->src,cache->id,cache->pipe_to_bus);
                                 free(send_msg);
                             }else if((send_msg->msg->dest < cache->id && (send_msg->msg->shared_line & 0xf0) == 0) && send_msg->msg->operation == FLUSH){
-                                printf("reply.");
+                                //printf("reply.");
                                 send_msg->msg->shared_line |= msg->src;
                                 struct msg* new_msg = malloc(sizeof(struct msg));
                                 send_message(new_msg,cycle+1,BUSRD|REPLY,send_msg->msg->shared_line,msg->addr,msg->src,cache->id,cache->pipe_to_bus);
@@ -259,11 +259,11 @@ void handle_msg_fromBUS_dragon(struct cache_block* block, struct msg* msg, struc
                     }
                 }
             free(msg);
-            printf("\n");
+            //printf("\n");
         }
     }else if((msg->operation & FLUSH) != 0){              //change shared line
-        printf("msg is FLUSH\n");
-        show_cache(cache);
+        //printf("msg is FLUSH\n");
+        //show_cache(cache);
         if(block == NULL){
             struct element* send_msg = NULL;
             struct element* next_send_msg = NULL;

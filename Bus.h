@@ -22,7 +22,7 @@ struct bus{
 };
 
 struct bus* bus_init(struct L1_cache *C0, struct L1_cache *C1, struct L1_cache *C2, struct L1_cache *C3, struct memory *mem){
-    printf("bus init....\n");
+    //printf("bus init....\n");
     struct bus *bus = malloc(sizeof(struct bus));
     bus->pipe_from_C0 = C0->pipe_to_bus;
     bus->pipe_to_C0 = C0->pipe_from_bus;
@@ -166,7 +166,7 @@ void bus_run(struct bus *bus, long int cycle){
         select_pipe = bus->pipe_from_C0;
         select_msg = from_C0;
     }
-    printf("cycle %ld,bus receives mes %d from %d, dest is %x\n",cycle,select_msg->operation,select_msg->src,select_msg->dest);
+    //printf("cycle %ld,bus receives mes %d from %d, dest is %x\n",cycle,select_msg->operation,select_msg->src,select_msg->dest);
     message = read_pipe(select_pipe);
     message->cycle = cycle+1;
     if((message->operation & (REPLY | FLUSH | BUSUPD)) != 0 ){

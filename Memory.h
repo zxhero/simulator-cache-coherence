@@ -34,7 +34,7 @@ struct memory{
 };
 
 struct memory * memory_init(int block_size){
-    printf("memory init....\n");
+    //printf("memory init....\n");
     struct memory * mem = malloc(sizeof(struct memory));
     mem->pipe_from_bus = malloc(sizeof(struct pipe));
     mem->pipe_to_bus = malloc(sizeof(struct pipe));
@@ -65,7 +65,7 @@ void write_back(struct memory *mem, long int cycle){
     struct mem_block *entry, *next_entry;
     list_for_each_entry_safe(entry,next_entry,&mem->blocks_in_cache->head,head){
         if(entry->state == BLOCK_WBACK && entry->cycle == cycle){
-            printf("memory delete %x\n",entry->addr * mem->block_size);
+            //printf("memory delete %x\n",entry->addr * mem->block_size);
             list_delete_entry(&entry->head);
             free(entry);
         }else if(entry->state == BLOCK_SENDING){
@@ -73,7 +73,7 @@ void write_back(struct memory *mem, long int cycle){
             int find = 0;
             list_for_each_entry(msg_entry,&mem->pipe_to_bus->head.head,head){
                 if(msg_entry->msg->dest == entry->cache_id && entry->addr == ((msg_entry->msg->addr) / mem->block_size)){
-                    find = 1;                    
+                    find = 1;
                     break;
                 }
             }
@@ -96,7 +96,7 @@ void memory_run(struct memory *mem, long int cycle){
             struct mem_block *entry = lookup_mem(addr,mem);
             if((request->msg->operation & (BUSRD | BUSRDX)) != 0){                                      //read mem
                 if(entry == NULL){
-                    printf("cycle %ld, mem will send back data(BLOCK_in_mem) to cahce%d in 100 cycle.\n",cycle,request->msg->src);
+                    //printf("cycle %ld, mem will send back data(BLOCK_in_mem) to cahce%d in 100 cycle.\n",cycle,request->msg->src);
                     struct msg *reply = malloc(sizeof(struct msg));
                     memset(reply,0,sizeof(struct msg));
                     //printf("CHECK2\n");
@@ -111,7 +111,7 @@ void memory_run(struct memory *mem, long int cycle){
                     list_add_head(&entry->head,&mem->blocks_in_cache->head);
                 }else{
                     if(entry->state == BLOCK_WBACK){
-                        printf("cycle %ld, mem will send back data(BLOCK_WBACK) to cahce%d in 100 cycle.\n",cycle,request->msg->src);
+                        //printf("cycle %ld, mem will send back data(BLOCK_WBACK) to cahce%d in 100 cycle.\n",cycle,request->msg->src);
                         entry->state = BLOCK_SENDING;
                         entry->cache_id = request->msg->src;
                         entry->cycle = cycle + 100;
@@ -120,7 +120,7 @@ void memory_run(struct memory *mem, long int cycle){
                         //send_message(reply,entry->cycle + 100,request->msg->operation | REPLY,request->msg->src,request->msg->addr,request->msg->src,MEMORY_ID,mem->pipe_to_bus);
                         send_message(reply,cycle + 100,request->msg->operation | REPLY,request->msg->src,request->msg->addr,request->msg->src,MEMORY_ID,mem->pipe_to_bus);
                     }else if(entry->state == BLOCK_SENDING){
-                        printf("cycle %ld, mem will send back data(BLOCK_SENDING) to cahce%d in 100 cycle.\n",cycle,request->msg->src);
+                        //printf("cycle %ld, mem will send back data(BLOCK_SENDING) to cahce%d in 100 cycle.\n",cycle,request->msg->src);
                         int shared = 0;
                         long int time = 0;
                         struct element *msg_entry;
@@ -135,13 +135,13 @@ void memory_run(struct memory *mem, long int cycle){
                         memset(reply,0,sizeof(struct msg));
                         send_message(reply,time,request->msg->operation | REPLY,request->msg->src | shared,request->msg->addr,request->msg->src,MEMORY_ID,mem->pipe_to_bus);
                     }else{
-                        printf("cycle %ld, request for %x from cache%d is in cache. mem block %x maybe in cache %d\n",
+                        //printf("cycle %ld, request for %x from cache%d is in cache. mem block %x maybe in cache %d\n",
                                 cycle,request->msg->addr,request->msg->src,entry->addr*mem->block_size,entry->cache_id);
                     }
                 }
             }else if((request->msg->operation & FLUSH) != 0){                                  //write mem
                 if(entry == NULL){
-                    printf("can not find %x!\n",request->msg->addr);
+                    //printf("can not find %x!\n",request->msg->addr);
                     exit(1);
                 }
                 entry->state = BLOCK_WBACK;
@@ -151,7 +151,7 @@ void memory_run(struct memory *mem, long int cycle){
             }
         }
         else break;
-        
+
         list_delete_entry(&request->head);
         free(request->msg);
         free(request);

@@ -58,7 +58,7 @@ struct L1_cache{
 };
 
 struct L1_cache* cache_init(int cache_size, int associativity, int block_size, char* protocol, char id){
-    printf("cache %c init....\n",'0'+id);
+    //printf("cache %c init....\n",'0'+id);
     int i, num_of_blocks;
     unsigned int mask = 0xffffffff;
     struct L1_cache *local_cache = malloc(sizeof(struct L1_cache));
@@ -138,7 +138,7 @@ void cache_run(struct L1_cache *cache, long int cycle, struct directory *dir){
     struct msg* bus_msg = peek_at_msg(cache->pipe_from_bus);
     struct cache_block *block = NULL;
     if(bus_msg != NULL && bus_msg->cycle <= cycle){
-        printf("cycle %ld, cache %d read from bus, src: %d. ",cycle, cache->id,bus_msg->src);
+        //printf("cycle %ld, cache %d read from bus, src: %d. ",cycle, cache->id,bus_msg->src);
         bus_msg = read_pipe(cache->pipe_from_bus);
         block = lookup_cache(cache,bus_msg->addr);
             if(cache->protocol == DRAGON){
@@ -148,7 +148,7 @@ void cache_run(struct L1_cache *cache, long int cycle, struct directory *dir){
             }
     }
     else if(pro_msg != NULL && pro_msg->cycle <= cycle){
-        printf("cycle %ld,cache %d read from pro. ",cycle, cache->id);
+        //printf("cycle %ld,cache %d read from pro. ",cycle, cache->id);
         pro_msg = read_pipe(cache->pipe_from_pro);
         block = lookup_cache(cache,pro_msg->addr);
         if(block == NULL)   cache->miss_time ++;

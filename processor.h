@@ -24,7 +24,7 @@ struct processor{
 };
 
 struct processor* processor_init(char *input_file, int pro_id,struct L1_cache *local_cache){
-    printf("processor %d init....\n",pro_id);
+    //printf("processor %d init....\n",pro_id);
 	struct processor *proc = malloc(sizeof(struct processor));
     char benchmark[100];
     char benchid[10] = "_*.data";
@@ -34,7 +34,7 @@ struct processor* processor_init(char *input_file, int pro_id,struct L1_cache *l
 	proc->pipe_from_cache = local_cache->pipe_to_pro ;
 	proc->pipe_to_cache = local_cache->pipe_from_pro ;
 	proc->benchmark = fopen(benchmark,"r");
-    printf("benchmark: %s\n",benchmark);
+    //printf("benchmark: %s\n",benchmark);
 	proc->pro_id = pro_id;
 	proc->cycle = 0; //clock
 	proc->state = 0; //Assume the processor is free
@@ -51,7 +51,7 @@ void processor_run(long int cycle, struct processor *proc){
 	int label; //To store the value of the label
 	if(proc->state == 1 && peek_at_msg(proc->pipe_from_cache) != NULL){ //There is a message from the cache
 		struct msg * rply = read_pipe(proc->pipe_from_cache);
-        printf("cycle %ld, processor %d get 0x%x\n",cycle,1<<proc->pro_id,rply->addr);
+        //printf("cycle %ld, processor %d get 0x%x\n",cycle,1<<proc->pro_id,rply->addr);
 		proc->state = 0; //Make the processor free again
         free(rply);
         proc->excution_cycle ++;
@@ -72,7 +72,7 @@ void processor_run(long int cycle, struct processor *proc){
             scanf("%d",&i);
             return;
         }; //Scans in the values and the labels
-        printf("cycle %ld, processor %d read 0x%x\n",cycle,1<<proc->pro_id,addr);
+        //printf("cycle %ld, processor %d read 0x%x\n",cycle,1<<proc->pro_id,addr);
 		struct msg *message = malloc(sizeof(struct msg)); //Creates a new message
 		memset(message,0,sizeof(struct msg));
 		if(label == 0){ //Load instruction
@@ -101,12 +101,12 @@ void processor_run(long int cycle, struct processor *proc){
 			return;
 		}
 		else{
-			printf("error in labels!");
+			//printf("error in labels!");
 			exit(1);
 		}
 
 	}else if(proc->state == 1 && (proc->cycle + 500) == cycle){
-        printf("something wrong with processor %d \n",1<<proc->pro_id);
+        //printf("something wrong with processor %d \n",1<<proc->pro_id);
         exit(1);
     }else if(proc->state == 1){
         proc->idle_cycle++;
